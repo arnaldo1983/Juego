@@ -38,7 +38,7 @@ export const SONGS = {
 
   // ─────────────── PRADERA · Do mayor, saltarín ───────────────
   pradera: {
-    bpm: 138, loop: true,
+    gain: 1.35, bpm: 138, loop: true,
     inst: { lead: 'lead', pad: 'stab', bass: 'bass', arp: 'marimba' },
     padPat: '..x...x...x...x.', arpWhen: 'var', arpPat: '0.2.4.2.1.2.4.2.',
     bassPat: 'R..5..R.R..5.O..',
@@ -125,7 +125,7 @@ export const SONGS = {
 
   // ─────────────── CASTILLO · Re menor armónico, tenso ───────────────
   castillo: {
-    bpm: 132, loop: true,
+    gain: 1.15, bpm: 132, loop: true,
     inst: { lead: 'brass', pad: 'pad', bass: 'bass', arp: 'pluck' },
     arpWhen: 'var', arpPat: '0.2.1.2.0.2.1.2.', arpOct: 62,
     bassPat: 'R.R.R.R.R.R.O.5.',
@@ -154,7 +154,7 @@ export const SONGS = {
 
   // ─────────────── ESTRELLA · Mi mayor, rápido y eufórico ───────────────
   star: {
-    bpm: 168, loop: true,
+    gain: 1.1, bpm: 168, loop: true,
     inst: { lead: 'bright', pad: 'pad', bass: 'bass', arp: 'pluck' },
     arpWhen: 'always', arpPat: '0123012301230123', arpOct: 64,
     bassPat: 'R.O.R.O.R.O.R.O.',
@@ -183,7 +183,7 @@ export const SONGS = {
 
   // ─────────────── NIVEL SUPERADO · fanfarria corta (bVI–bVII–I) ───────────────
   clear: {
-    bpm: 126, loop: false, tail: 2.5,
+    gain: 1.1, bpm: 126, loop: false, tail: 2.5,
     inst: { lead: 'brass', pad: 'pad', bass: 'bass' },
     bassPat: 'R---------------', harmAlways: true, crash: false,
     mix: { lead: [1.1, 0, 0.35], harm: [0.6, -0.25, 0.4], pad: [0.9, 0.2, 0.5], bass: [0.9], drums: [0.9, 0, 0.2] },

@@ -64,13 +64,15 @@ function level1() {
   b.coins(129, 6, 2);
   b.pit(131, 133);
   b.arc(131, 6, 3, 1);
-  b.put(138, 2, 'e').put(140, 2, 'e');
+  b.put(136, 2, 'e').put(138, 2, 'e');
 
-  // Escaleras gemelas separadas por un hueco.
-  b.stairs(143, 2, 4, 1);
-  b.pit(147, 148);
-  b.stairs(149, 2, 4, -1);
-  b.coins(146, 8, 4);
+  // Colina de piedra con puente de ladrillos sobre un abismo (y un Bellotín en el puente).
+  b.stairs(141, 2, 4, 1);
+  b.pit(145, 150);
+  b.text(145, 5, 'BBBBBB');
+  b.put(148, 6, 'e');
+  b.arc(145, 8, 6, 1);
+  b.stairs(151, 2, 4, -1);
 
   // F) Dominar: bloques en sonrisa, más enemigos y un Escarabajo.
   b.text(157, 5, '?').text(159, 6, 'B?B').text(163, 5, '?');
@@ -122,7 +124,7 @@ function level2() {
   // C) Avispón y Escarabajos bajo una fila de cristal.
   b.put(56, 2, 'e');
   b.text(60, 5, 'BB$BB');
-  b.put(63, 6, 'w');
+  b.put(63, 8, 'w');
   b.put(66, 2, 'k').put(70, 2, 'e');
   b.text(73, 2, '^^');
 
@@ -288,7 +290,7 @@ function level4() {
   b.rect(107, 2, 2, 3, 'X');
   b.rect(111, 2, 2, 2, 'X');
   b.put(109, 8, 'w');
-  b.text(106, 7, '?');
+  b.text(106, 7, 'M');                     // Fruta/Flor tras el punto de control
 
   // E) Giro: ascensor sobre lava hasta la muralla, con planta ígnea arriba.
   b.pit(120, 126, '~');
@@ -303,7 +305,7 @@ function level4() {
   b.pit(152, 155, '~');
   b.firePillar(158, 2, 3);
   b.pit(161, 163, '~');
-  b.put(166, 9, 'w');
+  b.put(166, 6, 'w');
   b.put(168, 2, 'k');
 
   // Escalera final y meta.

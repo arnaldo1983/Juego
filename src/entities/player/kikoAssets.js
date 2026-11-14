@@ -14,7 +14,7 @@ export const PAL = {
   leatherDark: new THREE.Color(0x5c321b),
   sole: new THREE.Color(0xf0e2cc),
   brass: new THREE.Color(0xf3c35a),
-  roll: new THREE.Color(0x4f9b6a),
+  roll: new THREE.Color(0xc9a77a),
 };
 export const OUTFIT = {
   normal: { scarf: 0xe8262f, scarfSheen: 0xff9aa0, cloth: 0x2d63c8, clothSheen: 0x9cc4ff, rim: 0xffe2bf, rimK: 0.42 },
@@ -52,8 +52,8 @@ ${tip ? 'varying float vTip;' : ''}`)
   float rimF = pow(fr, 2.6);
   totalEmissiveRadiance += uRimColor * uRimK * uRimScale * rimF;
   vec3 rb = 0.5 + 0.5 * cos(6.2831 * (uTime * 1.6 + vViewPosition.y * 0.9 + vViewPosition.x * 0.4 + vec3(0.0, 0.33, 0.67)));
-  totalEmissiveRadiance += uStar * rb * (0.45 + 1.6 * rimF);
-  diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * (0.6 + 0.6 * rb), uStar * 0.6);
+  totalEmissiveRadiance += uStar * rb * (0.22 + 1.5 * rimF);
+  diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * (0.55 + 0.7 * rb), uStar * 0.45);
   totalEmissiveRadiance += uFlash * (0.5 + rimF);
   ${tip ? 'float fl = 0.8 + 0.2 * sin(uTime * 23.0) * sin(uTime * 7.0 + 1.3);\n  totalEmissiveRadiance += vec3(1.0, 0.45, 0.08) * uTipGlow * vTip * fl * 2.2;' : ''}
 }`);
@@ -159,19 +159,19 @@ export function getKikoAssets() {
     paint(skull, (v, n, c) => {
       const ny = (v.y - 0.17) / 0.23, nx = v.x / 0.245, nz = v.z / 0.26;
       // máscara blanca en la parte baja frontal y mejillas (forma de corazón de zorro)
-      let w = ss(-0.02, -0.32, ny - Math.abs(nz) * 0.25 + 0.05) * ss(-0.35, 0.25, nx);
-      w = Math.max(w, ss(0.55, 0.9, nx) * ss(0.05, -0.2, ny + Math.abs(nz) * 0.4) * 0.0);
+      const tt = ny + 0.12 * Math.abs(nz) - 0.16 * ss(0.45, 0.95, nx) + 0.04;
+      const w = ss(0.02, -0.09, tt) * ss(-0.4, 0.15, nx);
       c.copy(PAL.fur).lerp(PAL.furDeep, ss(0.2, 1, ny) * 0.35 + ss(0.2, -0.9, nx) * 0.25);
       return c.lerp(PAL.cream, w);
     });
     const cheekA = xf(new THREE.SphereGeometry(0.085, 20, 14), { s: [0.95, 0.7, 1.0], p: [0.08, 0.08, 0.16], r: [0.3, 0.25, 0] });
     const cheekB = xf(new THREE.SphereGeometry(0.085, 20, 14), { s: [0.95, 0.7, 1.0], p: [0.08, 0.08, -0.16], r: [-0.3, -0.25, 0] });
     // mechones de las mejillas (puntas hacia los lados)
-    const tuftA = xf(new THREE.ConeGeometry(0.04, 0.09, 10), { r: [Math.PI / 2 + 0.6, 0, 0.25], p: [0.05, 0.06, 0.225] });
-    const tuftB = xf(new THREE.ConeGeometry(0.04, 0.09, 10), { r: [-Math.PI / 2 - 0.6, 0, 0.25], p: [0.05, 0.06, -0.225] });
+    const tuftA = xf(new THREE.ConeGeometry(0.034, 0.075, 10), { r: [Math.PI / 2 + 0.7, 0, 0.3], p: [0.06, 0.06, 0.215] });
+    const tuftB = xf(new THREE.ConeGeometry(0.034, 0.075, 10), { r: [-Math.PI / 2 - 0.7, 0, 0.3], p: [0.06, 0.06, -0.215] });
     [cheekA, cheekB, tuftA, tuftB].forEach((g) => solid(g, PAL.cream));
     const snout = xf(new THREE.SphereGeometry(1, 28, 18), { s: [0.135, 0.085, 0.105], p: [0.215, 0.105, 0], r: [0, 0, -0.12] });
-    paint(snout, (v, n, c) => c.copy(PAL.fur).lerp(PAL.cream, ss(0.15, -0.35, n.y + (v.x - 0.25) * 1.2)));
+    paint(snout, (v, n, c) => c.copy(PAL.fur).lerp(PAL.cream, ss(0.08, -0.12, n.y + (v.x - 0.27) * 1.0)));
     // flequillo: tres mechones
     const fr = [];
     for (let i = 0; i < 3; i++) {

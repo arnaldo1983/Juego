@@ -105,7 +105,7 @@ export class Sequencer {
     this.group = E.makeGroup(song.mix);
     if (song.delay) E.setDelay(song.delay * 60 / song.bpm / 4, song.delayFb ?? 0.36);
     const t0 = ctx.currentTime + 0.06;
-    this.group.fade(1, t0 - 0.02, 0.01);
+    this.group.fade(song.gain ?? 1, t0 - 0.02, 0.01);
     this.nextTime = t0;
     this._tick();
   }
@@ -132,11 +132,11 @@ export class Sequencer {
     this.timer = setTimeout(() => this._tick(), 25);
   }
   /** Renderizado síncrono (para OfflineAudioContext). */
-  renderAll(name, song, seconds) {
+  renderAll(name, song, seconds, startStep = 0) {
     this.name = name; this.song = song; this.comp = compile(name, song);
-    this.group = this.E.makeGroup(song.mix); this.group.fade(1, 0, 0.001);
+    this.group = this.E.makeGroup(song.mix); this.group.fade(song.gain ?? 1, 0, 0.001);
     if (song.delay) this.E.setDelay(song.delay * 60 / song.bpm / 4, song.delayFb ?? 0.36);
-    let t = 0.02, step = 0; const sd = 60 / song.bpm / 4;
+    let t = 0.02, step = startStep; const sd = 60 / song.bpm / 4;
     while (t < seconds) {
       if (step >= this.comp.total) { if (!song.loop) break; step = 0; }
       scheduleStep(this.E, this.group, this.comp.steps[step], t, sd);

@@ -85,7 +85,7 @@ export function heightStrip(o) {
   const idx = [];
   for (let j = 0; j < nz - 1; j++) for (let i = 0; i < nx - 1; i++) {
     const a = j * nx + i, b = a + 1, c = a + nx, d = c + 1;
-    idx.push(a, b, c, b, d, c);
+    if (o.flip) idx.push(a, c, b, b, c, d); else idx.push(a, b, c, b, d, c);
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
@@ -101,6 +101,25 @@ export function heightStrip(o) {
   g.computeBoundingSphere();
   return g;
 }
+
+/**
+ * Superficie paramétrica genérica (paredes verticales, etc.). fn(u,v) -> [x,y,z]; c(x,y,z,n) -> Color.
+ * Las caras miran hacia +Z cuando u crece en X y v crece en Y.
+ */
+export function surface(us, vs, fn, c) {
+  const nu = us.length, nv = vs.length, pos = new Float32Array(nu * nv * 3), colr = new Float32Array(nu * nv * 3);
+  for (let j = 0; j < nv; j++) for (let i = 0; i < nu; i++) pos.set(fn(us[i], vs[j]), (j * nu + i) * 3);
+  const idx = [];
+  for (let j = 0; j < nv - 1; j++) for (let i = 0; i < nu - 1; i++) { const a = j * nu + i, b = a + 1, cc = a + nu, d = cc + 1; idx.push(a, b, cc, b, d, cc); }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
+  const n = g.attributes.normal, nn = new THREE.Vector3();
+  for (let v = 0; v < nu * nv; v++) { nn.fromBufferAttribute(n, v); const k = v * 3; const cl = c(pos[k], pos[k + 1], pos[k + 2], nn); colr[k] = cl.r; colr[k + 1] = cl.g; colr[k + 2] = cl.b; }
+  g.setAttribute('color', new THREE.BufferAttribute(colr, 3));
+  g.computeBoundingSphere();
+  return g;
+}
+export const range = (a, b, step) => { const out = []; for (let x = a; x < b + step * 0.5; x += step) out.push(Math.min(x, b)); return out; };
 
 /** Crea un InstancedMesh a partir de una lista de transformaciones {x,y,z,s,sx,sy,sz,rx,ry,rz,c}. */
 export function instanced(geo, mat, list, { shadow = false, receive = false } = {}) {

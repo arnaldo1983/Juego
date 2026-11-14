@@ -29,7 +29,7 @@ export function createEngine(ctx) {
   comp.threshold.value = -18; comp.knee.value = 10; comp.ratio.value = 3; comp.attack.value = 0.005; comp.release.value = 0.2;
   const lim = ctx.createDynamicsCompressor();
   lim.threshold.value = -4; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = 0.001; lim.release.value = 0.1;
-  const out = ctx.createGain(); out.gain.value = 0.9;
+  const out = ctx.createGain(); out.gain.value = 0.72;
   master.connect(comp); comp.connect(lim); lim.connect(out); out.connect(ctx.destination);
   E.master = master; E.out = out;
 

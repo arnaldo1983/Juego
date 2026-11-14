@@ -211,7 +211,7 @@ export function createKiko() {
       yawT = -PI / 2 + Math.sin(d * 9) * 0.06 * Math.max(0, 1 - d);
       rate = 18; plant = 0;
       Object.assign(T, {
-        lean: -0.12, aZ: [2.6, 2.6], aX: [0.75, 0.75], el: [0.5, 0.5], lZ: [0.5, -0.1], kn: [-0.9, -0.3], lX: [0.35, 0.35],
+        lean: -0.12, aZ: [0.35, 0.35], aX: [2.3, 2.3], el: [0.9, 0.9], lZ: [0.5, -0.1], kn: [-0.9, -0.3], lX: [0.35, 0.35],
         hp: -0.2, hr: Math.sin(d * 5) * 0.08, earBack: -0.35, eyeOpen: 1, eyeWide: 1.18, browUp: 1, mouthO: 1,
       });
     } else if (s.victory) {
@@ -219,7 +219,7 @@ export function createKiko() {
       yawT = -PI / 2 + 0.15;
       const hop = Math.max(0, Math.sin(v * 7));
       Object.assign(T, {
-        aZ: [2.9, 2.9], aX: [0.55, 0.55], el: [0.2, 0.2], hipDrop: -hop * 0.06, lean: -0.05, hp: -0.25,
+        aZ: [0.25, 0.25], aX: [2.5, 2.5], el: [0.3, 0.3], hipDrop: -hop * 0.06, lean: -0.05, hp: -0.25,
         eyeOpen: 0.45, mouthO: 0.8, earBack: -0.2, lZ: [0.1, -0.1], kn: [-0.2 * hop, -0.2 * hop],
       });
       plant = 0.5;
