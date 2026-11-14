@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b4fd8"/><stop offset="1" stop-color="#0b1530"/></linearGradient>
+<linearGradient id="f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffa64a"/><stop offset="1" stop-color="#e2560e"/></linearGradient>
+<linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff8d0"/><stop offset=".5" stop-color="#ffd23f"/><stop offset="1" stop-color="#f08a00"/></linearGradient>
+</defs>
+<rect width="512" height="512" rx="112" fill="url(#bg)"/>
+<circle cx="256" cy="300" r="190" fill="#ffd23f" opacity=".14"/>
+<g transform="translate(64 96) scale(8)">
+<path d="M6 5l13 9h10l13-9-3 19c-1 10-8 17-15 18-7-1-14-8-15-18z" fill="url(#f)" stroke="#7a2a00" stroke-width="2" stroke-linejoin="round"/>
+<path d="M9.5 9.5l6.5 5-5.6 4.4zM38.5 9.5l-6.5 5 5.6 4.4z" fill="#3b1606" opacity=".75"/>
+<path d="M10 27c4-1 8 1 10 5 1.4 3 2.6 6 4 9.6 1.4-3.6 2.6-6.6 4-9.6 2-4 6-6 10-5-2 8-7 14-14 15-7-1-12-7-14-15z" fill="#fff8ee"/>
+<ellipse cx="17.5" cy="24.5" rx="2.4" ry="3.1" fill="#1a0d06"/><ellipse cx="30.5" cy="24.5" rx="2.4" ry="3.1" fill="#1a0d06"/>
+<circle cx="18.3" cy="23.3" r=".9" fill="#fff"/><circle cx="31.3" cy="23.3" r=".9" fill="#fff"/>
+<path d="M21.6 34.5h4.8L24 37.3z" fill="#1a0d06"/>
+</g>
+<path transform="translate(360 40) scale(2.6)" d="M24 3.5l6 12.6 13.8 1.9-10 9.7 2.4 13.8L24 34.9l-12.2 6.6 2.4-13.8-10-9.7 13.8-1.9z" fill="url(#s)" stroke="#9a4d00" stroke-width="2.4" stroke-linejoin="round"/>
+</svg>

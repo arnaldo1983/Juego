@@ -1,0 +1,46 @@
+// Ajustes visuales por tema: cielo, niebla, luces, mapa de entorno, gradación y bloom.
+export const PRESETS = {
+  pradera: {
+    exposure: 1.0,
+    sky: { top: 0x1659c8, mid: 0x4d97e6, horizon: 0xd6ecf8, bottom: 0xa9d0e6, sunColor: 0xfff4dc, sunIntensity: 9, haloColor: 0xffdc9e, sunDir: [-0.32, 0.3, -0.9], sunSize: 0.03, halo: 0.6, haloSize: 5, horizonGlow: 0.12 },
+    fog: { color: 0xc4def0, near: 20, far: 235 },
+    hemi: { sky: 0xd2e9ff, ground: 0x6e7c3c, i: 1.0 },
+    sun: { color: 0xfff0d6, i: 2.7, dir: [-0.48, 0.82, 0.42] },
+    env: 0.5,
+    grade: { tint: [1.03, 1.0, 0.95], sat: 1.1, contrast: 1.05, vignette: 0.28, lift: [0.0, 0.0, 0.012] },
+    bloom: { strength: 0.32, radius: 0.55, threshold: 0.92 },
+  },
+  cueva: {
+    exposure: 1.05,
+    sky: { top: 0x05040c, mid: 0x0b0a1e, horizon: 0x251c4a, bottom: 0x0a0818, sunColor: 0x9ff0ff, sunIntensity: 0, haloColor: 0x5a3fa8, sunDir: [0.0, 0.1, -1], sunSize: 0.0, halo: 0.25, haloSize: 3, horizonGlow: 0.35 },
+    fog: { color: 0x1d1840, near: 18, far: 150 },
+    hemi: { sky: 0x6f7fd8, ground: 0x2a1238, i: 0.85 },
+    sun: { color: 0xa8dcff, i: 1.5, dir: [-0.3, 0.9, 0.35] },
+    env: 0.35,
+    point: { color: 0xffd9a0, i: 14, dist: 9 },
+    grade: { tint: [0.95, 1.0, 1.08], sat: 1.12, contrast: 1.08, vignette: 0.5, lift: [0.008, 0.0, 0.02] },
+    bloom: { strength: 0.55, radius: 0.6, threshold: 0.85 },
+  },
+  cielo: {
+    exposure: 1.0,
+    sky: { top: 0x2a2470, mid: 0x9a4c9a, horizon: 0xffae73, bottom: 0xf3a0a0, sunColor: 0xfff0c8, sunIntensity: 7, haloColor: 0xff9a52, sunDir: [0.38, 0.075, -0.92], sunSize: 0.11, halo: 0.9, haloSize: 3.2, horizonGlow: 0.4 },
+    fog: { color: 0xf0a88e, near: 45, far: 300 },
+    hemi: { sky: 0xffc6d8, ground: 0x8a4f80, i: 1.0 },
+    sun: { color: 0xffc89a, i: 2.6, dir: [0.55, 0.55, 0.5] },
+    env: 0.55,
+    grade: { tint: [1.05, 0.98, 0.97], sat: 1.08, contrast: 1.04, vignette: 0.3, lift: [0.012, 0.0, 0.02] },
+    bloom: { strength: 0.4, radius: 0.6, threshold: 0.9 },
+  },
+  castillo: {
+    exposure: 1.05,
+    sky: { top: 0x05030b, mid: 0x170818, horizon: 0x5a1a12, bottom: 0x2a0a08, sunColor: 0xff6a4a, sunIntensity: 2.6, haloColor: 0xff3a1a, sunDir: [0.32, 0.34, -0.88], sunSize: 0.075, halo: 0.6, haloSize: 6, stars: 1.2, moon: true, horizonGlow: 0.55 },
+    fog: { color: 0x2c0e0d, near: 30, far: 220 },
+    hemi: { sky: 0x6a4a78, ground: 0xb8401a, i: 0.85 },
+    sun: { color: 0xffb0a0, i: 1.55, dir: [0.45, 0.8, 0.4] },
+    env: 0.4,
+    point: { color: 0xff8a40, i: 10, dist: 8 },
+    grade: { tint: [1.06, 0.97, 0.94], sat: 1.06, contrast: 1.1, vignette: 0.5, lift: [0.015, 0.0, 0.01] },
+    bloom: { strength: 0.6, radius: 0.6, threshold: 0.85 },
+  },
+};
+export const preset = (t) => PRESETS[t] || PRESETS.pradera;
