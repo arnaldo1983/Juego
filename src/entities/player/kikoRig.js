@@ -414,7 +414,7 @@ export function createKiko() {
     if (lastO === O) return; lastO = O;
     M.scarf.color.set(O.scarf); M.scarf.sheenColor.set(O.scarfSheen);
     M.cloth.color.set(O.cloth); M.cloth.sheenColor.set(O.clothSheen);
-    M.scarf.emissive.set(O === OUTFIT.fire ? 0x401000 : 0x000000);
+    M.scarf.emissive.set(O === OUTFIT.fire ? 0x3a1a04 : 0x000000);
     U.uRimColor.value.set(O.rim); U.uRimK.value = O.rimK;
   }
 

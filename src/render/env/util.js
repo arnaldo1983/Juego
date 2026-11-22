@@ -73,12 +73,12 @@ export function heightStrip(o) {
   const nx = Math.ceil((o.x1 - o.x0) / o.dx) + 1;
   const rows = o.zs.slice();
   const skirt = o.skirt != null;
-  if (skirt) rows.unshift(rows[0] + 0.01);
+  if (skirt) rows.unshift(rows[0] + 0.02, rows[0] + 0.01);
   const nz = rows.length;
   const pos = new Float32Array(nx * nz * 3), colr = new Float32Array(nx * nz * 3);
   for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) {
     const x = o.x0 + i * o.dx, z = rows[j];
-    const y = skirt && j === 0 ? o.skirt : o.h(x, z);
+    const y = skirt && j === 0 ? o.skirt : skirt && j === 1 ? o.h(x, rows[2]) - (o.lipDepth ?? 1.4) : o.h(x, z);
     const k = (j * nx + i) * 3;
     pos[k] = x; pos[k + 1] = y; pos[k + 2] = z;
   }
@@ -94,7 +94,7 @@ export function heightStrip(o) {
   const n = g.attributes.normal;
   for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) {
     const v = j * nx + i, k = v * 3;
-    const c = skirt && j === 0 ? (o.skirtColor || col(0x000000)) : o.c(pos[k], pos[k + 2], pos[k + 1], n.getY(v));
+    const c = skirt && j === 0 ? (o.skirtColor || col(0x000000)) : skirt && j === 1 ? (o.lipColor || o.skirtColor || col(0x000000)) : o.c(pos[k], pos[k + 2], pos[k + 1], n.getY(v));
     colr[k] = c.r; colr[k + 1] = c.g; colr[k + 2] = c.b;
   }
   g.setAttribute('color', new THREE.BufferAttribute(colr, 3));

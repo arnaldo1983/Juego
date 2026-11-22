@@ -23,11 +23,31 @@ export function vnoise(x, y, px, py, s = 0) {
   const a = hash(x0, y0, s), b = hash(x1, y0, s), c = hash(x0, y1, s), d = hash(x1, y1, s);
   return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
 }
-/** fbm periódico: u,v en [0,1), freq = celdas base. */
-export function fbm(u, v, freq, oct = 4, s = 0, fy = freq) {
+/** fbm periódico exacto (lento). */
+export function fbmSlow(u, v, freq, oct = 4, s = 0, fy = freq) {
   let sum = 0, amp = 0.5, tot = 0, f = freq, g = fy;
   for (let o = 0; o < oct; o++) { sum += amp * vnoise(u * f, v * g, f, g, s + o * 17); tot += amp; amp *= 0.5; f *= 2; g *= 2; }
   return sum / tot;
+}
+// Campo de ruido precalculado (periodo 1, 7 octavas) muestreado con desplazamientos por semilla: ~10x más rápido.
+const FN = 512; let FIELD = null;
+function field() {
+  if (FIELD) return FIELD;
+  FIELD = new Float32Array(FN * FN);
+  for (let y = 0; y < FN; y++) for (let x = 0; x < FN; x++) FIELD[y * FN + x] = fbmSlow(x / FN, y / FN, 2, 7, 999);
+  // normalizar contraste a ~0..1
+  let mn = 1, mx = 0; for (const v of FIELD) { if (v < mn) mn = v; if (v > mx) mx = v; }
+  for (let i = 0; i < FIELD.length; i++) FIELD[i] = 0.5 + ((FIELD[i] - mn) / (mx - mn) - 0.5) * 1.15;
+  return FIELD;
+}
+/** fbm periódico rápido: u,v en [0,1), freq = celdas base (entero para que sea periódico). */
+export function fbm(u, v, freq, oct = 4, s = 0, fy = freq) {
+  const F = FIELD || field();
+  const x = (u * Math.max(1, Math.round(freq * 0.5)) + hash(s, 1, 77)) * FN, y = (v * Math.max(1, Math.round(fy * 0.5)) + hash(s, 2, 77)) * FN;
+  const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fyy = y - yi;
+  const x0 = xi & (FN - 1), x1 = (xi + 1) & (FN - 1), y0 = (yi & (FN - 1)) * FN, y1 = ((yi + 1) & (FN - 1)) * FN;
+  const a = F[y0 + x0], b = F[y0 + x1], c = F[y1 + x0], d = F[y1 + x1];
+  return a + (b - a) * fx + (c - a) * fyy + (a - b - c + d) * fx * fyy;
 }
 /** Voronoi periódico: devuelve {f1, f2, id, cx, cy} (cx,cy centro de la celda en coords de celda). */
 export function voronoi(u, v, n, s = 0, jit = 0.9, out = {}) {
@@ -351,23 +371,29 @@ export function dirtTex(theme, size) {
     const P = pal(theme), b = new Buf(size), cs = P.dirt.map(hex), pb = P.pebble.map(hex), vo = {};
     b.each((u, v, i) => {
       const warp = (fbm(u, v, 3, 4, 201) - 0.5) * 0.12;
-      const layer = (v + warp) * 6; // 6 estratos en 4 unidades
+      const layer = (v + warp + (fbm(u, v, 2, 2, 205) - 0.5) * 0.05) * 5; // 5 estratos en 4 unidades
       const li = Math.floor(layer), lf = layer - li;
       const lc = cs[wrap(li, 4)], ln = cs[wrap(li + 1, 4)];
-      let c = lerp3(lc, ln, sstep(0.82, 1, lf));
+      let c = lerp3(lc, ln, sstep(0.78, 1, lf)); c = lerp3(c, [c[0] * 0.72, c[1] * 0.7, c[2] * 0.68], sstep(0.7, 0.78, lf) * sstep(0.86, 0.78, lf));
       const n = fbm(u, v, 12, 5, 211), grain = hash((u * size) | 0, (v * size) | 0, 7);
       const tone = 0.78 + n * 0.4 + (grain - 0.5) * 0.08;
       c = [c[0] * tone, c[1] * tone, c[2] * tone];
       let h = n * 0.35 + sstep(0.85, 1, lf) * -0.1 + grain * 0.03;
       let r = 0.92;
-      // piedras incrustadas
-      voronoi(u, v, 10, 221, 0.8, vo);
-      const pr = 0.18 + hash(vo.id, 2, 3) * 0.2, has = hash(vo.id, 5, 6) > 0.55;
-      if (has && vo.f1 < pr) {
-        const k = Math.sqrt(1 - (vo.f1 / pr) ** 2), pc = pb[(hash(vo.id, 8, 9) * pb.length) | 0];
-        const t2 = 0.7 + k * 0.45 + (n - 0.5) * 0.3;
-        c = lerp3(c, [pc[0] * t2, pc[1] * t2, pc[2] * t2], sstep(0, 0.25, k)); h += k * 0.6; r = 0.7;
-      } else if (has && vo.f1 < pr + 0.06) { c = [c[0] * 0.75, c[1] * 0.72, c[2] * 0.7]; h -= 0.05; }
+      // piedras incrustadas: pocas, de tamaños variados, ovaladas y medio enterradas
+      voronoi(u * 1.0, v, 7, 221, 0.85, vo);
+      const sid = vo.id, has = hash(sid, 5, 6) > 0.62, pr = 0.16 + hash(sid, 2, 3) * 0.26;
+      const ex = (u * 7 - vo.cx) / (0.8 + hash(sid, 3, 3) * 0.6), ey = (v * 7 - vo.cy) / (0.55 + hash(sid, 4, 3) * 0.35);
+      const pd = Math.hypot(ex, ey) * (1 + (n - 0.5) * 0.5);
+      if (has && pd < pr) {
+        const k = Math.sqrt(1 - (pd / pr) ** 2), pc = pb[(hash(sid, 8, 9) * pb.length) | 0];
+        const lit = clamp(0.62 + k * 0.3 + ey * 0.6 + (n - 0.5) * 0.4);
+        const sc = lerp3(c, [pc[0] * lit, pc[1] * lit, pc[2] * lit], 0.75 * sstep(0, 0.3, k));
+        c = sc; h += k * 0.55; r = 0.6;
+      } else if (has && pd < pr + 0.08) { const ao = 1 - sstep(pr + 0.08, pr, pd) * 0.35; c = [c[0] * ao, c[1] * ao, c[2] * ao]; h -= 0.04; }
+      // gravilla fina
+      const gv = hash((u * size * 0.5) | 0, (v * size * 0.5) | 0, 17);
+      if (gv > 0.985) { const gc = pb[1]; c = lerp3(c, gc, 0.5); h += 0.1; }
       if (theme === 'cueva') { const cr = hash((u * size) | 0, (v * size) | 0, 99); if (cr > 0.997) b.setE(i, [0.5, 0.9, 1], 1); else { const vein = sstep(0.02, 0, Math.abs(fbm(u, v, 3, 4, 231) - 0.5)); b.setE(i, [0.6, 0.3, 1], vein * 0.6); c = lerp3(c, [0.5, 0.4, 0.9], vein * 0.5); } }
       if (theme === 'castillo') { const vein = sstep(0.022, 0, Math.abs(fbm(u, v, 3, 4, 241) - 0.5)) * sstep(0.3, 0.7, fbm(u, v, 2, 2, 7)); b.setE(i, [1, 0.32, 0.04], vein * 1.4); c = lerp3(c, [0.2, 0.05, 0.02], vein); h -= vein * 0.3; }
       if (theme === 'pradera') { // raíces finas

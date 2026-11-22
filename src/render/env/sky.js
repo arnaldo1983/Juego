@@ -21,8 +21,8 @@ void main(){
   float y = d.y;
   vec3 c;
   if (y > 0.0) {
-    c = mix(uHorizon, uMid, smoothstep(0.0, 0.22, y));
-    c = mix(c, uTop, smoothstep(0.18, 0.75, y));
+    c = mix(uHorizon, uMid, smoothstep(0.0, 0.1, y));
+    c = mix(c, uTop, smoothstep(0.06, 0.32, y));
   } else {
     c = mix(uHorizon, uBottom, smoothstep(0.0, 0.28, -y));
   }

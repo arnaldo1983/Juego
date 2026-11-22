@@ -2,8 +2,8 @@
 export const PRESETS = {
   pradera: {
     exposure: 1.0,
-    sky: { top: 0x1659c8, mid: 0x4d97e6, horizon: 0xd6ecf8, bottom: 0xa9d0e6, sunColor: 0xfff4dc, sunIntensity: 9, haloColor: 0xffdc9e, sunDir: [-0.32, 0.3, -0.9], sunSize: 0.03, halo: 0.6, haloSize: 5, horizonGlow: 0.12 },
-    fog: { color: 0xc4def0, near: 20, far: 235 },
+    sky: { top: 0x0f4fc0, mid: 0x3384e0, horizon: 0xc2e0f4, bottom: 0xa9d0e6, sunColor: 0xfff4dc, sunIntensity: 9, haloColor: 0xffd890, sunDir: [-0.32, 0.3, -0.9], sunSize: 0.03, halo: 0.4, haloSize: 7, horizonGlow: 0.08 },
+    fog: { color: 0xa9cdec, near: 26, far: 320 },
     hemi: { sky: 0xd2e9ff, ground: 0x6e7c3c, i: 1.0 },
     sun: { color: 0xfff0d6, i: 2.7, dir: [-0.48, 0.82, 0.42] },
     env: 0.5,

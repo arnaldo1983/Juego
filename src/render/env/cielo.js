@@ -19,7 +19,7 @@ function geos() {
   const island = merge([body, top, lip, ...tr(0.35, -0.2, 1.4), ...tr(-0.3, 0.1, 1.0), ...tr(0.0, -0.5, 1.2)]);
   const rock = merge([paint(jitter(new THREE.IcosahedronGeometry(0.6, 1), 0.18, 1.8, 2), 0xc07a4a, { top: 0xe8a868, y0: -0.3, y1: 0.5, shadeBottom: 0.45 }),
     paint(new THREE.SphereGeometry(0.5, 10, 4, 0, Math.PI * 2, 0, Math.PI / 2).scale(1, 0.25, 1).translate(0, 0.32, 0), 0x7cc850)]);
-  const puff = paint(jitter(new THREE.IcosahedronGeometry(1, 2), 0.1, 1.3, 8), 0xffffff);
+  const puff = paint(jitter(new THREE.IcosahedronGeometry(1, 1), 0.08, 1.3, 8), 0xffffff);
   // Globo aerostático original: envoltura a gajos + cesta
   const env = new THREE.SphereGeometry(1, 12, 10).scale(1, 1.15, 1).translate(0, 1.8, 0);
   const ep = env.attributes.position, ec = new Float32Array(ep.count * 3), ca = col(0xff5a6a), cb = col(0xffd65a);

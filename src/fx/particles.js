@@ -17,7 +17,8 @@ const X = 0, Y = 1, Z = 2, VX = 3, VY = 4, VZ = 5, T = 6, LIFE = 7, S0 = 8, S1 =
   FLAGS = 23, OX = 24, OY = 25, ANG = 26, RAD = 27, AV = 28, RV = 29, FIN = 30, SEED = 31, STRIDE = 32;
 const F_TWINKLE = 1, F_ORBIT = 2, F_RAINBOW = 4, F_VALIGN = 8, F_FADEPOW = 16, F_SHRINK = 32;
 
-const Z_FX = 0.62; // plano delante de los bloques
+const Z_FX = 0.62;
+const SIZE_MUL = 1.3; // escala global de los billboards // plano delante de los bloques
 
 const VERT = /* glsl */`
 attribute vec3 iPos; attribute vec4 iCol; attribute vec4 iData;
@@ -35,7 +36,7 @@ void main() {
   vCol = iCol;
 }`;
 const FRAG = /* glsl */`
-uniform sampler2D map; uniform float uHot; uniform float uOcc;
+uniform sampler2D map; uniform float uHot; uniform float uOcc; uniform float uGain;
 varying vec2 vUv; varying vec4 vCol;
 void main() {
   vec4 t = texture2D(map, vUv);
@@ -43,14 +44,16 @@ void main() {
   // Mezcla "aditiva con oclusión" premultiplicada: brilla en fondos oscuros y conserva color en cielos claros
   float cov = t.a * vCol.a;
   if (cov < 0.003) discard;
-  vec3 c = vCol.rgb + vec3(t.r * uHot);
-  c = linearToOutputTexel(vec4(c, 1.0)).rgb;
-  gl_FragColor = vec4(c * cov, cov * uOcc);
+  gl_FragColor = vec4(vCol.rgb * uGain + vec3(t.r * uHot) * (0.5 + 0.5 * dot(vCol.rgb, vec3(0.33))), 1.0);
+  #include <tonemapping_fragment>
+  #include <colorspace_fragment>
+  gl_FragColor = vec4(gl_FragColor.rgb * cov, cov * uOcc);
 #else
-  vec3 c = vCol.rgb * (0.62 + 0.5 * t.r);
   float a = t.a * vCol.a;
   if (a < 0.004) discard;
-  gl_FragColor = linearToOutputTexel(vec4(c, a));
+  gl_FragColor = vec4(vCol.rgb * (0.62 + 0.5 * t.r), a);
+  #include <tonemapping_fragment>
+  #include <colorspace_fragment>
 #endif
 }`;
 
@@ -60,14 +63,14 @@ function materials() {
   if (matAdd) return;
   const map = getAtlas();
   matAdd = new THREE.ShaderMaterial({
-    uniforms: { map: { value: map }, uHot: { value: 0.55 }, uOcc: { value: 0.8 } }, vertexShader: VERT, fragmentShader: FRAG,
-    defines: { ADDITIVE: 1 }, transparent: true, depthWrite: false, toneMapped: false,
+    uniforms: { map: { value: map }, uHot: { value: 0.8 }, uOcc: { value: 0.8 }, uGain: { value: 1.8 } }, vertexShader: VERT, fragmentShader: FRAG,
+    defines: { ADDITIVE: 1 }, transparent: true, depthWrite: false, toneMapped: true,
     blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor,
     blendSrcAlpha: THREE.ZeroFactor, blendDstAlpha: THREE.OneFactor,
   });
   matAlpha = new THREE.ShaderMaterial({
-    uniforms: { map: { value: map }, uHot: { value: 0 }, uOcc: { value: 1 } }, vertexShader: VERT, fragmentShader: FRAG,
-    transparent: true, depthWrite: false, blending: THREE.NormalBlending, toneMapped: false,
+    uniforms: { map: { value: map }, uHot: { value: 0 }, uOcc: { value: 1 }, uGain: { value: 1 } }, vertexShader: VERT, fragmentShader: FRAG,
+    transparent: true, depthWrite: false, blending: THREE.NormalBlending, toneMapped: true,
   });
   // Trozo de ladrillo: caja biselada (bordes suavizados por normales promediadas)
   const g = new THREE.BoxGeometry(1, 0.72, 0.8, 2, 2, 2);
@@ -84,6 +87,7 @@ function materials() {
 }
 
 const BRICK_COLORS = { pradera: 0xc8643a, cueva: 0x6670c8, cielo: 0xe0956a, castillo: 0x86707a };
+const DUST_TINT = 1.25;
 const DUST_COLORS = { pradera: 0xf3e2c4, cueva: 0xb9b6d8, cielo: 0xfff0f0, castillo: 0x9a8a88 };
 const FW_PALETTE = [0xff3b6b, 0xffd23a, 0x3ad7ff, 0x8cff4a, 0xc86bff, 0xff8a2a, 0xffffff, 0x4affc8];
 
@@ -181,7 +185,7 @@ class BillboardPool {
       const p3 = w * 3, p4 = w * 4;
       P[p3] = d[o + X]; P[p3 + 1] = d[o + Y]; P[p3 + 2] = d[o + Z];
       C[p4] = r; C[p4 + 1] = g; C[p4 + 2] = b; C[p4 + 3] = a;
-      D[p4] = size; D[p4 + 1] = rot; D[p4 + 2] = str; D[p4 + 3] = d[o + FRM];
+      D[p4] = size * SIZE_MUL; D[p4 + 1] = rot; D[p4 + 2] = str; D[p4 + 3] = d[o + FRM];
       w++;
     }
     this.geo.instanceCount = w;
@@ -306,12 +310,13 @@ export class Particles {
   popup(text, x, y) {
     const e = getPopupTexture(String(text));
     const mat = new THREE.SpriteMaterial({ map: e.tex, transparent: true, depthTest: false, depthWrite: false, toneMapped: false });
+    mat.color.setScalar(1.35); // compensa el tone mapping del postprocesado
     const s = new THREE.Sprite(mat);
     s.geometry.userData.shared = true;
     s.renderOrder = 40;
     s.position.set(x, y, Z_FX + 0.3);
     this.scene.add(s);
-    const h = e.oneUp ? 0.95 : 0.72;
+    const h = e.oneUp ? 1.1 : 0.85;
     this.popups.push({ s, mat, x, y, t: 0, life: e.oneUp ? 1.25 : 0.95, h, w: h * e.aspect });
     // pequeño destello en el origen del texto
     const p = reset(x, y); p.frame = FRAME.FLARE; p.life = 0.28; p.s0 = 0.2; p.s1 = 1.1; col(e.oneUp ? 0x6aff7a : 0xffd65a, 1.2); p.flags = F_FADEPOW;
@@ -362,7 +367,7 @@ function ring(pool, x, y, hex, size, life = 0.4, mul = 1, stretch = 1, a = 1) {
 function puff(ps, x, y, hex, o) {
   const p = reset(x, y);
   p.frame = Math.random() < 0.5 ? FRAME.SMOKE : FRAME.SMOKE2; p.life = o.life || rand(0.45, 0.8);
-  p.s0 = o.s0 || 0.3; p.s1 = o.s1 || 0.8; col(hex); if (o.hex2 !== undefined) col2(o.hex2);
+  p.s0 = o.s0 || 0.3; p.s1 = o.s1 || 0.8; col(hex, o.additive ? 1 : DUST_TINT); if (o.hex2 !== undefined) col2(o.hex2);
   p.vx = o.vx || 0; p.vy = o.vy || 0; p.drag = o.drag ?? 4; p.grav = o.grav ?? -0.8; p.vr = rand(-2, 2);
   p.a = o.a ?? 0.75; p.fin = 0.12; p.z = Z_FX - 0.08 + rand(-0.05, 0.05);
   (o.additive ? ps.add : ps.alpha).push(p);
@@ -373,8 +378,8 @@ function sparks(ps, x, y, count, hex, hex2, o = {}) {
     const sp = rand(o.min ?? 4, o.max ?? 9);
     const p = reset(x, y); p.frame = FRAME.SPARK; p.flags = F_VALIGN | (o.twinkle ? F_TWINKLE : 0);
     p.vx = Math.cos(a) * sp; p.vy = Math.sin(a) * sp; p.vz = o.vz ? rand(-o.vz, o.vz) : 0;
-    p.life = rand(o.lmin ?? 0.3, o.lmax ?? 0.55); p.s0 = o.size ?? 0.16; p.s1 = (o.size ?? 0.16) * 0.5;
-    p.str = o.str ?? 0.12; p.drag = o.drag ?? 3; p.grav = o.grav ?? 6; col(hex, o.mul ?? 1.15); col2(hex2, o.mul2 ?? 1);
+    p.life = rand(o.lmin ?? 0.3, o.lmax ?? 0.55); p.s0 = (o.size ?? 0.16) * 1.4; p.s1 = (o.size ?? 0.16) * 0.6;
+    p.str = o.str ?? 0.12; p.drag = o.drag ?? 3; p.grav = o.grav ?? 6; col(hex, o.mul ?? 1.6); col2(hex2, o.mul2 ?? 0.9);
     p.delay = o.delay ? rand(0, o.delay) : 0;
     ps.add.push(p);
   }
@@ -384,8 +389,8 @@ function stars(ps, x, y, count, hex, o = {}) {
     const a = o.dir !== undefined ? o.dir + (count > 1 ? (i / (count - 1) - 0.5) * o.spread * 2 : 0) : (i / count) * 6.283 + rand(-0.3, 0.3);
     const sp = rand(o.min ?? 3, o.max ?? 6);
     const p = reset(x, y); p.frame = FRAME.STAR; p.vx = Math.cos(a) * sp; p.vy = Math.sin(a) * sp + (o.up ?? 0);
-    p.life = rand(o.lmin ?? 0.45, o.lmax ?? 0.7); p.s0 = o.size ?? 0.42; p.s1 = (o.size ?? 0.42) * 0.7;
-    p.vr = rand(-7, 7); p.drag = o.drag ?? 2.5; p.grav = o.grav ?? 9; col(hex, o.mul ?? 1.1); if (o.hex2 !== undefined) col2(o.hex2, o.mul ?? 1.3);
+    p.life = rand(o.lmin ?? 0.45, o.lmax ?? 0.7); p.s0 = (o.size ?? 0.42) * 1.25; p.s1 = (o.size ?? 0.42) * 0.85;
+    p.vr = rand(-7, 7); p.drag = o.drag ?? 2.5; p.grav = o.grav ?? 9; col(hex, o.mul ?? 1.2); if (o.hex2 !== undefined) col2(o.hex2, o.mul ?? 1.3);
     p.flags = (o.twinkle ? F_TWINKLE : 0) | F_SHRINK; p.fin = 0.02;
     (o.alpha ? ps.alpha : ps.add).push(p);
   }
@@ -394,13 +399,13 @@ function stars(ps, x, y, count, hex, o = {}) {
 const EMIT = {
   brick(ps, x, y, o) {
     const base = new THREE.Color(o.color !== undefined ? o.color : BRICK_COLORS[o.theme] ?? BRICK_COLORS.pradera);
-    const n = ps.n(10);
+    const n = ps.n(12);
     for (let i = 0; i < n; i++) {
       const side = i % 2 ? 1 : -1;
       const c = base.clone().offsetHSL(rand(-0.015, 0.015), rand(-0.05, 0.05), rand(-0.1, 0.06));
       if (i % 5 === 4) c.setHex(0xd8c8b0).multiplyScalar(0.8); // trozo de mortero
       ps.chunks.push(x + side * rand(0.05, 0.4), y + rand(-0.3, 0.35), rand(-0.2, 0.45),
-        side * rand(1.5, 5.5), rand(9, 16), rand(-1.5, 3), rand(0.17, 0.32), rand(1.6, 2.2), c);
+        side * rand(1.5, 5.5), rand(9, 16), rand(-1.5, 3), rand(0.26, 0.42), rand(1.6, 2.2), c);
     }
     const dust = DUST_COLORS[o.theme] ?? DUST_COLORS.pradera;
     for (let i = 0; i < ps.n(7); i++) {
@@ -492,29 +497,37 @@ const EMIT = {
   },
 
   firework(ps, x, y, o) {
-    const pal = o.colors || [FW_PALETTE[(Math.random() * FW_PALETTE.length) | 0], FW_PALETTE[(Math.random() * FW_PALETTE.length) | 0]];
+    const pick = () => FW_PALETTE[(Math.random() * FW_PALETTE.length) | 0];
+    const pal = o.colors || [pick(), pick()];
     const c1 = pal[0], c2 = pal[1] ?? pal[0];
-    flash(ps, x, y, 0xffffff, 5, 0.25, 1.0);
-    flash(ps, x, y, c1, 7, 0.6, 0.6);
-    const n = ps.n(90);
+    flash(ps, x, y, 0xffffff, 4, 0.2, 1.2);
+    flash(ps, x, y, c1, 9, 0.7, 0.55);
+    const n = ps.n(110);
     for (let i = 0; i < n; i++) {
-      // distribución esférica proyectada (más densidad en el borde -> forma de peonía)
+      // esfera proyectada: los bordes concentran chispas -> peonía nítida
       const u = Math.random() * 2 - 1, th = Math.random() * 6.283, rr = Math.sqrt(1 - u * u);
-      const sp = (i % 3 === 0 ? 7 : 10) * rand(0.92, 1.05);
-      const p = reset(x, y); p.frame = FRAME.SPARK; p.flags = F_VALIGN | (i % 2 ? F_TWINKLE : 0);
-      p.vx = Math.cos(th) * rr * sp; p.vy = Math.sin(th) * rr * sp; p.vz = u * sp * 0.25;
-      p.drag = 2.2; p.grav = 3.5; p.str = 0.09; p.life = rand(1.1, 1.6); p.s0 = 0.2; p.s1 = 0.1;
-      const hc = i % 3 === 0 ? c2 : c1; col(hc, 1.25); col2(hc, 0.7); p.fin = 0.01;
-      ps.add.push(p);
+      const inner = i % 4 === 0;
+      const sp = (inner ? 5.5 : 9.5) * rand(0.94, 1.04);
+      const hc = inner ? c2 : c1;
+      for (let k = 0; k < 2; k++) { // cabeza brillante + estela
+        const p = reset(x, y); p.frame = FRAME.SPARK; p.flags = F_VALIGN | (k ? 0 : (i % 2 ? F_TWINKLE : 0));
+        const f = k ? 0.9 : 1;
+        p.vx = Math.cos(th) * rr * sp * f; p.vy = Math.sin(th) * rr * sp * f; p.vz = u * sp * 0.2;
+        p.drag = 2.3; p.grav = 3.2; p.life = k ? rand(0.6, 0.9) : rand(1.2, 1.7); p.fin = 0.01;
+        if (k) { p.s0 = 0.3; p.s1 = 0.08; p.str = 0.22; col(hc, 1.0); col2(hc, 0.3); p.a = 0.8; }
+        else { p.s0 = 0.4; p.s1 = 0.16; p.str = 0.07; col(hc, 2.0); col2(hc, 0.9); }
+        ps.add.push(p);
+        if (ps.quality === 'low') break;
+      }
     }
     // crepitar retardado
-    for (let i = 0; i < ps.n(26); i++) {
-      const a = Math.random() * 6.283, r = rand(1.5, 3.6);
-      const p = reset(x + Math.cos(a) * r, y + Math.sin(a) * r - 0.5); p.frame = FRAME.FLARE; p.flags = F_TWINKLE | F_FADEPOW;
-      p.delay = rand(0.5, 1.0); p.life = rand(0.25, 0.45); p.s0 = 0.5; p.s1 = 0.2; p.grav = 1; col(i % 2 ? 0xffffff : 0xfff0b0, 1.6); p.vr = 4;
+    for (let i = 0; i < ps.n(30); i++) {
+      const a = Math.random() * 6.283, r = rand(1.8, 4.2);
+      const p = reset(x + Math.cos(a) * r, y + Math.sin(a) * r - 0.6); p.frame = FRAME.FLARE; p.flags = F_TWINKLE | F_FADEPOW;
+      p.delay = rand(0.55, 1.1); p.life = rand(0.25, 0.45); p.s0 = 0.7; p.s1 = 0.25; p.grav = 1; col(i % 2 ? 0xffffff : 0xfff0b0, 1.5); p.vr = 4;
       ps.add.push(p);
     }
-    ring(ps.add, x, y, c2, 4.5, 0.45, 1.2);
+    ring(ps.add, x, y, c2, 5.5, 0.5, 1.2);
   },
 
   lava(ps, x, y) {

@@ -64,7 +64,7 @@ export function buildTerrain(level, theme, quality, mats) {
     return best === null ? 0 : best - y;
   };
   const shadeFor = (d, zf = 1) => {
-    let s = mix(0.42, 1, sstep(0.0, 0.75, d)); // AO bajo la capa superior
+    let s = mix(0.3, 1, sstep(0.0, 0.9, d)); // AO bajo la capa superior
     s *= mix(1, 0.32, sstep(1.0, 11, d)); // más oscuro en profundidad
     return s * zf;
   };
@@ -78,7 +78,7 @@ export function buildTerrain(level, theme, quality, mats) {
     const mb = chunk(x);
     for (let y = YB; y < H; y++) {
       if (!solid(x, y)) continue;
-      const big = y < -3 && quality !== 'high';
+      const big = y < -2;
       const n = big ? 1 : ns, st = 1 / n;
       for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
         const vs = [[i, j], [i + 1, j], [i + 1, j + 1], [i, j + 1]].map(([a, b]) => {
@@ -98,7 +98,7 @@ export function buildTerrain(level, theme, quality, mats) {
       for (const side of [-1, 1]) {
         if (solid(x + side, y)) continue;
         const X = side < 0 ? x : x + 1, mb = chunk(x);
-        const n = y < -3 && quality !== 'high' ? 1 : ns, st = 1 / n;
+        const n = y < -2 ? 1 : ns, st = 1 / n;
         for (let j = 0; j < n; j++) for (let k = 0; k < zsteps.length - 1; k++) {
           const quad = [[k, j], [k + 1, j], [k + 1, j + 1], [k, j + 1]].map(([a, b]) => {
             const z = zsteps[a], py = y + b * st, key = `s${X},${side},${Math.round(z * 100)},${Math.round(py * 4)}`;
@@ -140,12 +140,12 @@ export function buildTerrain(level, theme, quality, mats) {
       if (!ok && a !== null) { tops.push({ a, b: x - 1, h: y + 1, openL: !solid(a - 1, y), openR: !solid(x, y) }); a = null; }
     }
   }
-  const capGeos = [], fringe = new MeshBuf(), th = theme === 'cielo' ? 0.5 : 0.42, ovx = 0.1, ovz = 0.2;
-  const capMax = quality === 'low' ? 4 : 1;
+  const capGeos = [], fringe = new MeshBuf(), th = theme === 'cielo' ? 0.5 : 0.44, ovx = 0.12, ovz = 0.26;
+  const capMax = quality === 'low' ? 4 : 1.5;
   for (const t of tops) {
     const x0 = t.a - ovx, x1 = t.b + 1 + ovx, z0 = ZB - 0.1, z1 = ZF + ovz;
     const top = t.h + 0.04, bot = t.h - th + 0.04;
-    const g = roundedBox(x1 - x0, top - bot, z1 - z0, theme === 'castillo' ? 0.08 : 0.17, quality === 'low' ? 2 : 3,
+    const g = roundedBox(x1 - x0, top - bot, z1 - z0, theme === 'castillo' ? 0.08 : 0.21, quality === 'low' ? 2 : 3,
       { worldUV: 2, vRange: true, maxStep: capMax, offset: [(x0 + x1) / 2, (top + bot) / 2, (z0 + z1) / 2], faceMat: [1, 1, 0, 1, 1, 1] });
     // ondulación suave del césped
     const p = g.attributes.position;
@@ -158,7 +158,7 @@ export function buildTerrain(level, theme, quality, mats) {
     capGeos.push(g);
     // franja colgante frontal
     if (mats.fringe) {
-      const fh = theme === 'cielo' ? 0.42 : 0.34, fy = bot + 0.1, zf = ZF + ovz - 0.06;
+      const fh = theme === 'cielo' ? 0.42 : 0.5, fy = bot + 0.14, zf = ZF + ovz - 0.09;
       const addStrip = (pts, ukey) => {
         for (let i = 0; i < pts.length - 1; i++) {
           const q = [];
@@ -205,18 +205,17 @@ function crystalGeo() {
   }
   const g = mergeByMaterial(gs); g.userData.shared = true; return g;
 }
-function puffGeo() { const g = new THREE.IcosahedronGeometry(0.5, 2); g.userData.shared = true; return g; }
+function puffGeo() { const g = new THREE.IcosahedronGeometry(0.5, 1); g.userData.shared = true; return g; }
 function hexGeo() { const g = new THREE.CylinderGeometry(0.22, 0.25, 0.5, 6); g.translate(0, 0.25, 0); g.userData.shared = true; return g; }
 function flowerGeo() {
   const gs = [];
   const stem = new THREE.CylinderGeometry(0.012, 0.016, 0.26, 4); stem.translate(0, 0.13, 0); tint(ensureIndex(stem), [0.25, 0.5, 0.15]);
   const aux = (g, v) => { g.setAttribute('aux', new THREE.Float32BufferAttribute(new Float32Array(g.attributes.position.count).fill(v), 1)); return g; };
   aux(stem, 0); gs.push(stem);
-  for (let k = 0; k < 5; k++) {
-    const p = new THREE.SphereGeometry(0.055, 6, 4); p.scale(1, 0.35, 0.6); p.translate(0.06, 0, 0); p.rotateY((k / 5) * Math.PI * 2); p.rotateX(0.5); p.translate(0, 0.27, 0);
-    tint(p, [1, 1, 1]); aux(p, 1); gs.push(p);
-  }
-  const c = new THREE.SphereGeometry(0.035, 6, 4); c.rotateX(0.5); c.translate(0, 0.28, 0.01); tint(c, [1, 0.8, 0.15]); aux(c, 0); gs.push(c);
+  const p = new THREE.CircleGeometry(0.085, 15); const pp = p.attributes.position;
+  for (let i = 1; i < pp.count; i++) { const x = pp.getX(i), y = pp.getY(i), th = Math.atan2(y, x), k = 0.45 + 0.55 * Math.abs(Math.cos(th * 2.5)); pp.setXY(i, x * k, y * k); }
+  p.rotateX(-1.0); p.translate(0, 0.27, 0); tint(p, [1, 1, 1]); aux(p, 1); gs.push(p);
+  const c = new THREE.SphereGeometry(0.03, 6, 3); c.translate(0, 0.28, 0.012); tint(c, [1, 0.8, 0.15]); aux(c, 0); gs.push(c);
   const g = mergeByMaterial(gs, ['position', 'normal', 'uv', 'color', 'aux']); g.userData.shared = true; return g;
 }
 const GEO = {};

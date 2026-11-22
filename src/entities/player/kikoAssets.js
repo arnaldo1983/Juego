@@ -18,7 +18,7 @@ export const PAL = {
 };
 export const OUTFIT = {
   normal: { scarf: 0xe8262f, scarfSheen: 0xff9aa0, cloth: 0x2d63c8, clothSheen: 0x9cc4ff, rim: 0xffe2bf, rimK: 0.42 },
-  fire: { scarf: 0xff9a1f, scarfSheen: 0xffe2a0, cloth: 0xfbf5ec, clothSheen: 0xffffff, rim: 0xffb070, rimK: 0.6 },
+  fire: { scarf: 0xfff6ea, scarfSheen: 0xffd59a, cloth: 0xe8431a, clothSheen: 0xffb070, rim: 0xffb070, rimK: 0.6 },
 };
 
 // ------------------------------------------------------------------ uniforms compartidos
@@ -215,7 +215,7 @@ export function getKikoAssets() {
     });
     G.torso = shared(torso);
     const sp = smoothProfile([[0.001, -0.03], [0.125, -0.025], [0.158, 0.01], [0.162, 0.07], [0.157, 0.1], [0.001, 0.105]], 18);
-    G.shorts = shared(solid(lathe(sp, 26), new THREE.Color(1, 1, 1)));
+    G.shorts = shared(paint(lathe(sp, 26), (v, n, c) => (v.y < -0.012 && v.y > -0.03 ? c.setRGB(1, 0.42, 0.16) : c.setRGB(1, 1, 1))));
     // pernera corta alrededor del muslo
     G.cuff = shared(solid(xf(new THREE.CylinderGeometry(0.07, 0.077, 0.07, 16, 1, true), { p: [0, -0.02, 0] }), new THREE.Color(1, 1, 1)));
     const belt = xf(new THREE.TorusGeometry(0.163, 0.016, 8, 32), { r: [Math.PI / 2, 0, 0], p: [0, 0.1, 0], s: [0.94, 0.97, 1] });
@@ -263,7 +263,7 @@ export function getKikoAssets() {
   {
     const wrap = xf(new THREE.TorusGeometry(0.1, 0.048, 14, 32), { r: [Math.PI / 2, 0, 0], s: [1, 1, 0.85] });
     const knot = xf(new THREE.SphereGeometry(0.045, 14, 10), { p: [-0.125, -0.01, 0], s: [0.8, 1, 1.2] });
-    const st = (g) => paint(g, (v, n, c) => c.setRGB(1, 1, 1).multiplyScalar(Math.abs(Math.sin(Math.atan2(v.z, v.x) * 6)) > 0.93 ? 0.82 : 1));
+    const st = (g) => paint(g, (v, n, c) => (Math.abs(Math.sin(Math.atan2(v.z, v.x) * 5)) > 0.9 ? c.setRGB(1, 0.5, 0.2) : c.setRGB(1, 1, 1)));
     G.scarf = shared(merge([st(wrap), solid(knot, new THREE.Color(1, 1, 1))]));
   }
   // ---------- cola de la bufanda (piel con huesos)
@@ -277,7 +277,7 @@ export function getKikoAssets() {
       g.computeVertexNormals();
       return paint(g, (v, n, c) => {
         const f = -v.y / len;
-        return c.setRGB(1, 1, 1).multiplyScalar(f > 0.78 && f < 0.86 ? 0.55 : f > 0.9 ? 0.75 : 1);
+        return f > 0.74 && f < 0.82 ? c.setRGB(1, 0.5, 0.2) : f > 0.88 ? c.setRGB(1, 0.62, 0.3) : c.setRGB(1, 1, 1);
       });
     };
     const g = mergeGeometries([strip(0.34, 0.095, 0.06, 0.12), strip(0.28, 0.085, -0.06, -0.12)]);

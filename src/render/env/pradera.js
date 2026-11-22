@@ -24,7 +24,7 @@ function geos() {
   const stem = merge([paint(new THREE.CylinderGeometry(0.025, 0.03, 0.55, 4).translate(0, 0.27, 0), 0x3d8a2a),
     paint(new THREE.SphereGeometry(0.09, 5, 3).scale(1.6, 0.35, 0.8).translate(0.1, 0.18, 0), 0x4c9e32)]);
   const petals = [];
-  for (let i = 0; i < 5; i++) { const a = (i / 5) * Math.PI * 2; petals.push(paint(new THREE.SphereGeometry(0.075, 6, 4).scale(1, 1, 0.45).translate(Math.cos(a) * 0.085, 0.56 + Math.sin(a) * 0.085, 0), 0xffffff)); }
+  for (let i = 0; i < 5; i++) { const a = (i / 5) * Math.PI * 2; petals.push(paint(new THREE.SphereGeometry(0.08, 5, 3).scale(1, 1, 0.45).translate(Math.cos(a) * 0.085, 0.56 + Math.sin(a) * 0.085, 0), 0xffffff)); }
   const head = merge([...petals, paint(new THREE.SphereGeometry(0.05, 6, 4).translate(0, 0.56, 0.025), 0xffd23a)]);
   // Mechón de hierba
   const blades = [];
@@ -87,15 +87,15 @@ export function buildPradera(ctx) {
     const roll = Math.pow(0.5 + 0.5 * fbm(x * 0.022 + 3, d * 0.035, 3, 1), 1.7);
     return gy - 0.12 + t * 2.0 + 10 * Math.pow(t, 1.4) * roll + 0.22 * fbm(x * 0.25, d * 0.25, 2, 2) * smooth(3, 7, d);
   };
-  const grassA = col(0x4f9e30), grassB = col(0x8fd04a), grassC = col(0x2f7428), dry = col(0xc7c25a), tmp = new THREE.Color();
+  const grassA = col(0x4a9530), grassB = col(0x7fbf45), grassC = col(0x2d6a2a), dry = col(0xbdb85a), tmp = new THREE.Color();
   const terrainC = (x, z, y, ny) => {
     const n = fbm(x * 0.06, z * 0.09, 3, 4), n2 = fbm(x * 0.21, z * 0.3, 2, 5);
     tmp.copy(grassA).lerp(grassB, smooth(-0.4, 0.6, n + (ny - 0.85) * 2)).lerp(grassC, smooth(0.2, 0.9, -n2) * 0.5);
-    tmp.lerp(dry, smooth(0.35, 0.75, n2) * 0.35);
+    tmp.lerp(dry, smooth(0.35, 0.75, n2) * 0.35).lerp(grassC, smooth(0.1, 0.7, fbm(x * 0.03, z * 0.05, 2, 6)) * 0.35);
     return tmp.clone();
   };
   const near = heightStrip({ x0: -span(-50), x1: w + span(-50), dx: q === 'low' ? 1.6 : 1.0, zs: [-2.6, -3.2, -4, -5, -6.5, -8, -10, -12.5, -15, -18, -22, -27, -33, -40, -48, -56],
-    h: hNear, c: terrainC, skirt: -16, skirtColor: col(0x2a2416) });
+    h: hNear, c: terrainC, skirt: -16, skirtColor: col(0x120d08), lipColor: col(0x5a3a22) });
   const nearMesh = new THREE.Mesh(near, m.terrain); nearMesh.receiveShadow = true; group.add(nearMesh);
 
   // --- Colinas lejanas
@@ -122,7 +122,7 @@ export function buildPradera(ctx) {
     const x = r.range(-span(-30), w + span(-30)), z = -r.range(19, 50);
     if (fbm(x * 0.05, z * 0.07, 2, 12) < 0.0 && r() < 0.85) continue;
     const s = r.range(0.9, 1.6) * (1 + (-z - 19) * 0.015);
-    trees.push({ x, y: hNear(x, z) - 0.2, z, s, ry: r() * 6.28, c: r.pick(treeGreens) });
+    trees.push({ x, y: hNear(x, z) - 0.2, z, s, sx: r.range(0.85, 1.15), sy: r.range(0.85, 1.25), ry: r() * 6.28, c: r.pick(treeGreens) });
   }
   for (let i = 0; i < (w + 200) * 0.9 * dens; i++) {
     const x = r.range(-span(-90), w + span(-90)), z = -r.range(55, 95);
@@ -190,7 +190,7 @@ export function buildPradera(ctx) {
   const W0 = -200, W1 = w + 200;
   for (let i = 0; i < (W1 - W0) / 13; i++) cl.push({ x: r.range(W0, W1), y: r.range(26, 60), z: -r.range(130, 230), s: r.range(20, 38), flip: r() < 0.5, speed: r.range(0.4, 0.9) });
   for (let i = 0; i < (W1 - W0) / 30; i++) cl.push({ x: r.range(W0, W1), y: r.range(16, 26), z: -r.range(65, 100), s: r.range(9, 15), flip: r() < 0.5, speed: r.range(0.6, 1.1) });
-  const clouds = cloudLayer(cl, { lit: 0xffffff, shade: 0xa8bedb, x0: W0, x1: W1 });
+  const clouds = cloudLayer(cl, { lit: 0xffffff, shade: 0xb4c8e6, x0: W0, x1: W1, fog: false });
   group.add(clouds.mesh);
 
   // --- Polen y mariposas de luz

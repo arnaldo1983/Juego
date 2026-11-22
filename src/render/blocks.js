@@ -161,9 +161,10 @@ function getMats(theme, quality, renderer) {
 
 // ------------------------------------------------------------------ geometrías compartidas
 const GEOS = new Map();
+const STATIC_CACHE = new WeakMap(); // level.def -> Map(tema:calidad -> objetos estáticos)
 function sharedGeo(key, fn) { if (!GEOS.has(key)) { const g = fn(); g.userData.shared = true; GEOS.set(key, g); } return GEOS.get(key); }
 const seg = (q) => (q === 'low' ? 2 : 3);
-const blockGeo = (q, r = 0.08) => sharedGeo('block' + q + r, () => roundedBox(0.99, 0.99, 0.99, r, seg(q)));
+const blockGeo = (q, r = 0.08) => sharedGeo('block' + q + r, () => roundedBox(0.99, 0.99, 0.99, r, q === 'low' ? 1 : 2));
 function plankGeo(q) {
   return sharedGeo('plank' + q, () => {
     const p = roundedBox(1.0, 0.2, 1.24, 0.05, seg(q), { offset: [0, 0.4, 0] });
@@ -255,7 +256,6 @@ export class BlockRenderer {
     this.quality = ctx.quality || 'high';
     if (ctx.renderer) TX.setAnisotropy(Math.min(this.quality === 'low' ? 2 : 8, ctx.renderer.capabilities.getMaxAnisotropy()));
     this.group = new THREE.Group(); this.group.name = 'blocks'; ctx.scene.add(this.group);
-    this.own = []; // geometrías propias del nivel (no compartidas)
     this.mats = getMats(this.theme, this.quality, ctx.renderer);
     this.bumps = new Map();
     this._m = new THREE.Matrix4(); this._q = new THREE.Quaternion(); this._v = new THREE.Vector3(); this._s = new THREE.Vector3();
@@ -300,12 +300,21 @@ export class BlockRenderer {
   removeTile(key) { const w = this.where.get(key); if (!w) return; for (const p of w.ps) this.pools[p].remove(key); this.where.delete(key); }
 
   buildStatic() {
-    const L = this.level, M = this.mats, q = this.quality;
-    const { meshes, tops } = buildTerrain(L, this.theme, q, M);
-    for (const m of meshes) { this.group.add(m); this.own.push(m.geometry); }
-    for (const m of buildDecor(tops, this.theme, q, M, L)) this.group.add(m);
-    this.buildPillars();
-    this.buildLava();
+    // Terreno, decorado, columnas y lava no cambian en juego: se cachean por definición de nivel
+    // (loadLevel se repite en cada muerte) y se reutilizan los mismos objetos.
+    const L = this.level, M = this.mats, q = this.quality, ck = this.theme + ':' + q;
+    let per = STATIC_CACHE.get(L.def); if (!per) { per = new Map(); STATIC_CACHE.set(L.def, per); }
+    let objs = per.get(ck);
+    if (!objs) {
+      objs = [];
+      const { meshes, tops } = buildTerrain(L, this.theme, q, M);
+      objs.push(...meshes, ...buildDecor(tops, this.theme, q, M, L));
+      const p = this.buildPillars(); if (p) objs.push(p);
+      const lv = this.buildLava(); if (lv) objs.push(lv);
+      for (const o of objs) o.geometry.userData.shared = true;
+      per.set(ck, objs);
+    }
+    for (const o of objs) this.group.add(o);
   }
 
   // --- columnas de 2 casillas de ancho con capitel
@@ -350,11 +359,10 @@ export class BlockRenderer {
         make(a, wd, yb, y, L.tiles[y * W + a] === T.PILLAR_TOP);
       }
     }
-    if (!geos.length) return;
+    if (!geos.length) return null;
     const g = mergeByMaterial(geos);
     const m = new THREE.Mesh(g, [this.mats.pillar, this.mats.trim]); m.castShadow = m.receiveShadow = true;
-    this.group.add(m); this.own.push(g);
-    // musgo colgante sobre capiteles en la pradera
+    return m;
   }
 
   // --- lava animada
@@ -382,13 +390,13 @@ export class BlockRenderer {
         quad(a, b, c, d);
       }
     }
-    if (!idx.length) return;
+    if (!idx.length) return null;
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
     g.setAttribute('aTop', new THREE.Float32BufferAttribute(top, 1));
     g.setAttribute('aDepth', new THREE.Float32BufferAttribute(dep, 1));
     g.setIndex(idx); g.computeBoundingSphere();
-    const m = new THREE.Mesh(g, this.mats.lava); this.group.add(m); this.own.push(g);
+    return new THREE.Mesh(g, this.mats.lava);
   }
 
   /** Llamado cuando cambia una casilla (romper ladrillo, bloque usado...). */
@@ -420,9 +428,8 @@ export class BlockRenderer {
 
   dispose() {
     for (const p of Object.values(this.pools)) p.dispose();
-    this.group.traverse((o) => { if (o.isInstancedMesh) o.dispose(); });
-    for (const g of this.own) g.dispose();
     this.ctx.scene.remove(this.group);
+    this.group.clear(); // los objetos estáticos cacheados se reutilizan en la próxima carga
     this.bumps.clear();
   }
 }
