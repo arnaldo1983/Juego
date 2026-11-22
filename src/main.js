@@ -53,7 +53,7 @@ class Game {
     this.camera.aspect = w / h;
     // Garantizar ~13.5 casillas de alto y al menos 15 de ancho (móvil vertical)
     const tanH = Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2));
-    const needH = 6.9 / tanH, needW = 7.5 / (tanH * this.camera.aspect);
+    const needH = (IS_TOUCH ? 5.9 : 6.7) / tanH, needW = (IS_TOUCH ? 6.5 : 7.5) / (tanH * this.camera.aspect);
     this.cam.dist = Math.max(needH, needW);
     this.cam.halfH = this.cam.dist * tanH;
     this.cam.halfW = this.cam.halfH * this.camera.aspect;
