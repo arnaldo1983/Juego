@@ -92,12 +92,12 @@ export function buildCueva(ctx) {
     const near = r() < 0.45;
     const x = r.range(-span(-30), w + span(-30)), z = near ? -r.range(3.2, 9) : -r.range(10, 45);
     if (fbm(x * 0.06, z * 0.1, 2, 10) < -0.15) continue;
-    const s = near ? r.range(0.45, 0.9) : r.range(0.9, 2.2);
+    const s = near ? r.range(0.45, 0.9) : r.range(0.7, 1.6);
     crystals.push({ x, y: hFloor(x, z) - 0.15, z, s, ry: r() * 6, rz: r.range(-0.3, 0.3), c: r.pick(CRY) });
   }
-  for (const c of columns) if (r() < 0.5) crystals.push({ x: c.x + c.sx * 0.9, y: c.y + c.sy * r.range(0.25, 0.6), z: c.z + c.sz * 0.6, s: r.range(0.8, 1.5), rz: -1.2, ry: 0.3, c: r.pick(CRY) });
+  for (const c of columns) if (r() < 0.5) crystals.push({ x: c.x + c.sx * 0.9, y: c.y + c.sy * r.range(0.15, 0.45), z: c.z + c.sz * 0.6, s: r.range(0.5, 1.0), rz: -1.2, ry: 0.3, c: r.pick(CRY) });
   for (let i = 0; i < (w + 200) * 0.15; i++) { const x = r.range(-span(-90), w + span(-90)), y = r.range(-2, 22); crystals.push({ x, y, z: zWall(x, y) + 1.5, s: r.range(2.5, 5), rx: 1.2, rz: r.range(-0.6, 0.6), c: r.pick(CRY) }); }
-  for (let i = 0; i < (w + 80) * 0.25 * dens; i++) { const x = r.range(-span(-40), w + span(-40)), z = -r.range(8, 40); crystals.push({ x, y: hCeil(x, z) + 0.4, z, s: r.range(0.7, 1.6), rx: Math.PI, c: r.pick(CRY) }); }
+  for (let i = 0; i < (w + 80) * 0.25 * dens; i++) { const x = r.range(-span(-40), w + span(-40)), z = -r.range(8, 40); crystals.push({ x, y: hCeil(x, z) + 0.4, z, s: r.range(0.5, 1.1), rx: Math.PI, c: r.pick(CRY) }); }
   const crystalMesh = instanced(g.cluster, m.crystal, crystals);
   group.add(crystalMesh);
 
@@ -136,7 +136,7 @@ export function buildCueva(ctx) {
   return {
     group,
     update(dt, camX, camY, time, px) {
-      m.crystal.userData.glow.value = 1.25 + 0.2 * Math.sin(time * 1.3);
+      m.crystal.userData.glow.value = 1.0 + 0.15 * Math.sin(time * 1.3);
       rayL.update(dt, time); mistL.update(dt);
       flies.update(dt, camX, camY, time, px); dust.update(dt, camX, camY, time, px);
     },

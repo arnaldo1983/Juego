@@ -235,7 +235,7 @@ function goalRes() {
     // interior de la puerta (resplandor cálido)
     const door = new THREE.Shape();
     door.moveTo(-0.62, 0); door.lineTo(-0.62, 1.48); door.absarc(0, 1.48, 0.62, Math.PI, 0, true); door.lineTo(0.62, 0); door.closePath();
-    const doorIn = new THREE.ShapeGeometry(door, 12); doorIn.translate(CX, 0, FZ - 0.06);
+    const doorIn = new THREE.ShapeGeometry(door, 12); doorIn.translate(CX, 0, FZ + 0.012);
     { const p = doorIn.attributes.position, uv = doorIn.attributes.uv; for (let i = 0; i < p.count; i++) uv.setXY(i, (p.getX(i) - CX + 0.62) / 1.24, p.getY(i) / 2.1); }
     // hojas de la puerta abiertas
     const leafW = merge([-1, 1].map((sx) => {
@@ -247,7 +247,7 @@ function goalRes() {
     const win = [], frames = [];
     const addWin = (x, y, z, ww, hh, ry = 0) => {
       const s = new THREE.Shape(); s.moveTo(-ww / 2, 0); s.lineTo(-ww / 2, hh - ww / 2); s.absarc(0, hh - ww / 2, ww / 2, Math.PI, 0, true); s.lineTo(ww / 2, 0); s.closePath();
-      const g = new THREE.ShapeGeometry(s, 8); g.rotateY(ry); g.translate(x, y, z); win.push(g);
+      const g = new THREE.ShapeGeometry(s, 8); { const uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, (uv.getX(i) + ww / 2) / ww, uv.getY(i) / hh); } g.translate(0, 0, 0.03); g.rotateY(ry); g.translate(x, y, z); win.push(g);
       const f = new THREE.Shape(); const W = ww + 0.14, H = hh + 0.08; f.moveTo(-W / 2, -0.06); f.lineTo(-W / 2, H - W / 2); f.absarc(0, H - W / 2, W / 2, Math.PI, 0, true); f.lineTo(W / 2, -0.06); f.closePath();
       const fg = new THREE.ExtrudeGeometry(f, { depth: 0.04, bevelEnabled: false, curveSegments: 8 }); fg.translate(0, 0, -0.035); fg.rotateY(ry); fg.translate(x, y, z); frames.push(fg);
       // alféizar
@@ -295,7 +295,7 @@ function goalRes() {
       noiseFill(g, w, h, 12, 1);
     });
     const doorTex = tex('doorGlow', 64, 128, (g, w, h) => {
-      const gr = g.createLinearGradient(0, h, 0, 0); gr.addColorStop(0, '#ffcf70'); gr.addColorStop(0.35, '#e07a28'); gr.addColorStop(0.8, '#5a1e10'); gr.addColorStop(1, '#2a0c08');
+      const gr = g.createLinearGradient(0, h, 0, 0); gr.addColorStop(0, '#ffb050'); gr.addColorStop(0.18, '#a04818'); gr.addColorStop(0.55, '#3a140a'); gr.addColorStop(1, '#140604');
       g.fillStyle = gr; g.fillRect(0, 0, w, h);
     }, { repeat: false });
     const winTex = tex('winGlow', 64, 128, (g, w, h) => {
@@ -303,8 +303,6 @@ function goalRes() {
       g.fillStyle = gr; g.fillRect(0, 0, w, h);
       g.fillStyle = '#3a2410'; g.fillRect(w / 2 - 2, 0, 4, h); g.fillRect(0, h * 0.55, w, 4);
     }, { repeat: false });
-    { const p = winG.attributes.position, uv = winG.attributes.uv; // uv local por ventana aproximada
-      for (let i = 0; i < p.count; i++) uv.setXY(i, ((p.getX(i) % 0.4) + 0.4) % 0.4 / 0.4, ((p.getY(i) % 0.8) + 0.8) % 0.8 / 0.8); }
     return {
       pole, gold, pedestal, finial, ringClip, stoneG, doorIn, leafW, winG, frameG, roofG, goldG, vbanners,
       poleMat: mat('poleSilver', { physical: true, color: 0xf2f4f8, metalness: 0.85, roughness: 0.18, clearcoat: 0.5, env: 1.3 }),

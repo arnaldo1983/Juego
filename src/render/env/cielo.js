@@ -36,7 +36,7 @@ function mats() {
   if (M) return M;
   M = {
     island: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85, flatShading: false }),
-    cloud: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, emissive: 0x8a4a78, emissiveIntensity: 0.35 }),
+    cloud: new THREE.MeshStandardMaterial({ color: 0xf4e4ec, roughness: 1, emissive: 0x7a3a70, emissiveIntensity: 0.12 }),
     sea: new THREE.MeshBasicMaterial({ color: 0xf2b0a8, fog: true }),
     fall: new THREE.MeshBasicMaterial({ map: streakTex(), color: 0xfff4f4, transparent: true, depthWrite: false, opacity: 0.85 }),
   };
@@ -66,8 +66,8 @@ export function buildCielo(ctx) {
   // --- Islas lejanas con cascadas (balanceo suave)
   const isl = [];
   for (let x = -span(-80); x < w + span(-80); x += r.range(14, 30) / Math.sqrt(dens)) {
-    const z = -r.range(28, 150), s = r.range(2.6, 5.5) * (1 + -z * 0.02);
-    isl.push({ x, y: r.range(2, 12) + -z * 0.09, z, s, ry: r() * 6, ph: r() * 6, fall: r() < 0.6 });
+    const z = -r.range(55, 160), s = r.range(1.8, 3.4) * (1 + -z * 0.02);
+    isl.push({ x, y: r.range(0, 9) + -z * 0.1, z, s, ry: r() * 6, ph: r() * 6, fall: r() < 0.6 });
   }
   isl.sort((a, b) => a.z - b.z);
   const islMesh = instanced(g.island, m.island, isl);

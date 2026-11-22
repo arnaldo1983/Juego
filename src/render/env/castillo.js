@@ -61,18 +61,18 @@ export function buildCastillo(ctx) {
     return gy - 0.12 + smooth(4, 40, d) * 2.5 + 0.8 * fbm(x * 0.12, d * 0.12, 3, 1) * smooth(3, 8, d) - bank * 1.6 + 7 * Math.pow(Math.max(0, fbm(x * 0.03, d * 0.04, 2, 2)), 1.5) * smooth(22, 40, d);
   };
   const fA = col(0x17111a), fB = col(0x3a2c32), hot = col(0xff5a10);
-  const crack = (x, z) => Math.max(0, 1 - Math.abs(fbm(x * 0.18, z * 0.3, 2, 9)) * 9);
+  const crack = (x, z) => Math.max(0, 1 - Math.abs(fbm(x * 0.18, z * 0.3, 2, 9)) * 18);
   const floor = heightStrip({ x0: -span(-60), x1: w + span(-60), dx: q === 'low' ? 1.6 : 0.9, zs: [-2.6, -3.3, -4.2, -5.5, -7, -9, -11, -13, -15, -17, -19, -22, -27, -34, -44, -58],
     h: hFloor, c: (x, z, y, ny) => {
       const c = fA.clone().lerp(fB, smooth(0.7, 1, ny) * 0.6 + fbm(x * 0.2, z * 0.2, 2, 3) * 0.2);
-      const rz = riverZ(x), bank = Math.exp(-Math.pow((z - rz) / 2.2, 2));
-      return c.lerp(hot, bank * 0.45 + crack(x, z) * 0.6 * smooth(4, 6, -z));
+      const rz = riverZ(x), bank = Math.exp(-Math.pow((z - rz) / 1.5, 2));
+      return c.lerp(hot, bank * 0.22 + crack(x, z) * 0.22 * smooth(4, 6, -z));
     },
     skirt: -16, skirtColor: col(0x070406), lipColor: col(0x2a1a1c) });
   // brillo emisivo aprox. de grietas/orillas mediante color de vértice
   const floorMat = glowMaterial({ vertexColors: true, roughness: 0.9 }, 0.0);
   floorMat.onBeforeCompile = (sh) => {
-    sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n totalEmissiveRadiance += max(vec3(0.0), vColor.rgb - vec3(0.12, 0.1, 0.1)) * vec3(1.6, 0.7, 0.3);');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n totalEmissiveRadiance += max(vec3(0.0), vColor.rgb - vec3(0.12, 0.1, 0.1)) * vec3(1.3, 0.5, 0.18);');
   };
   floorMat.customProgramCacheKey = () => 'lavafloor';
   const floorMesh = new THREE.Mesh(floor, floorMat); floorMesh.receiveShadow = true; group.add(floorMesh);

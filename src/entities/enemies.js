@@ -158,7 +158,7 @@ export function createEnemy(game, s) {
     case 'acorn': return new Acorn(game, s.x, s.y);
     case 'beetle': return new Beetle(game, s.x, s.y);
     case 'wasp': return new Wasp(game, s.x, s.y);
-    case 'fireplant': return new FirePlant(game, s.x, s.y);
+    case 'fireplant': return new FirePlant(game, s.x + 0.5, s.y);
   }
   return null;
 }
