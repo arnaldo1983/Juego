@@ -278,10 +278,10 @@ export function createKiko() {
     if (st.throwT < 0.4 && !s.dying) {
       const k = st.throwT;
       const near = facing > 0 ? 0 : 1;
-      const z = k < 0.07 ? lerp(0.3, -1.3, k / 0.07) : k < 0.17 ? lerp(-1.3, 1.9, (k - 0.07) / 0.1) : lerp(1.9, 0.6, Math.min(1, (k - 0.17) / 0.23));
+      const z = k < 0.07 ? lerp(0.3, -1.3, k / 0.07) : k < 0.17 ? lerp(-1.3, 2.2, (k - 0.07) / 0.1) : lerp(2.2, 0.6, Math.min(1, (k - 0.17) / 0.23));
       T.aZ = T.aZ.slice(); T.aZ[near] = z; T.el = T.el.slice(); T.el[near] = k < 0.17 ? 1.2 : 0.15; T.aX = T.aX.slice(); T.aX[near] = 0.35;
       T.twist = k < 0.07 ? 0.3 : -0.35; rate = Math.max(rate, 30);
-      setPose({ aZ: T.aZ }, 60, dt);
+      st.throwPose = { near, z, el: k < 0.17 ? 1.3 : 0.1, w: k < 0.3 ? 1 : 1 - (k - 0.3) / 0.1 };
     }
     // aterrizaje: flexión
     st.sq.step(0, 220, 16, dt);
@@ -289,6 +289,10 @@ export function createKiko() {
     st.yaw = damp(st.yaw, yawT, s.dying ? 10 : 13, dt);
     P.plant = damp(P.plant, plant, 12, dt);
     setPose(T, rate, dt);
+    if (st.throwT < 0.4 && st.throwPose && !s.dying) {
+      const tp = st.throwPose;
+      P.aZ[tp.near] = lerp(P.aZ[tp.near], tp.z, tp.w); P.el[tp.near] = lerp(P.el[tp.near], tp.el, tp.w);
+    }
 
     // ---------------- aplicar
     yaw.rotation.y = st.yaw;

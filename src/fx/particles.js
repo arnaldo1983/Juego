@@ -18,7 +18,7 @@ const X = 0, Y = 1, Z = 2, VX = 3, VY = 4, VZ = 5, T = 6, LIFE = 7, S0 = 8, S1 =
 const F_TWINKLE = 1, F_ORBIT = 2, F_RAINBOW = 4, F_VALIGN = 8, F_FADEPOW = 16, F_SHRINK = 32;
 
 const Z_FX = 0.62;
-const SIZE_MUL = 1.3; // escala global de los billboards // plano delante de los bloques
+const SIZE_MUL = 1.3; // escala global de los billboards
 
 const VERT = /* glsl */`
 attribute vec3 iPos; attribute vec4 iCol; attribute vec4 iData;
@@ -63,7 +63,7 @@ function materials() {
   if (matAdd) return;
   const map = getAtlas();
   matAdd = new THREE.ShaderMaterial({
-    uniforms: { map: { value: map }, uHot: { value: 0.8 }, uOcc: { value: 0.8 }, uGain: { value: 1.8 } }, vertexShader: VERT, fragmentShader: FRAG,
+    uniforms: { map: { value: map }, uHot: { value: 0.5 }, uOcc: { value: 0.8 }, uGain: { value: 1.8 } }, vertexShader: VERT, fragmentShader: FRAG,
     defines: { ADDITIVE: 1 }, transparent: true, depthWrite: false, toneMapped: true,
     blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor,
     blendSrcAlpha: THREE.ZeroFactor, blendDstAlpha: THREE.OneFactor,
@@ -89,7 +89,7 @@ function materials() {
 const BRICK_COLORS = { pradera: 0xc8643a, cueva: 0x6670c8, cielo: 0xe0956a, castillo: 0x86707a };
 const DUST_TINT = 1.25;
 const DUST_COLORS = { pradera: 0xf3e2c4, cueva: 0xb9b6d8, cielo: 0xfff0f0, castillo: 0x9a8a88 };
-const FW_PALETTE = [0xff3b6b, 0xffd23a, 0x3ad7ff, 0x8cff4a, 0xc86bff, 0xff8a2a, 0xffffff, 0x4affc8];
+const FW_PALETTE = [0xff2a5a, 0xffc21a, 0x2a9dff, 0x6aff2a, 0xb24aff, 0xff6a10, 0xff4ad0, 0x1affc0];
 
 function qualityScale(q) { return q === 'low' ? 0.45 : q === 'medium' ? 0.75 : 1; }
 function detectQuality() {
@@ -514,8 +514,8 @@ const EMIT = {
         const f = k ? 0.9 : 1;
         p.vx = Math.cos(th) * rr * sp * f; p.vy = Math.sin(th) * rr * sp * f; p.vz = u * sp * 0.2;
         p.drag = 2.3; p.grav = 3.2; p.life = k ? rand(0.6, 0.9) : rand(1.2, 1.7); p.fin = 0.01;
-        if (k) { p.s0 = 0.3; p.s1 = 0.08; p.str = 0.22; col(hc, 1.0); col2(hc, 0.3); p.a = 0.8; }
-        else { p.s0 = 0.4; p.s1 = 0.16; p.str = 0.07; col(hc, 2.0); col2(hc, 0.9); }
+        if (k) { p.s0 = 0.26; p.s1 = 0.06; p.str = 0.5; col(hc, 1.0); col2(hc, 0.3); p.a = 0.8; }
+        else { p.s0 = 0.36; p.s1 = 0.14; p.str = 0.22; col(hc, 2.2); col2(hc, 1.0); }
         ps.add.push(p);
         if (ps.quality === 'low') break;
       }

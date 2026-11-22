@@ -326,11 +326,12 @@ export class BlockRenderer {
       const cx = x0 + wd / 2, s = seg(q);
       const D = wd > 1 ? 1.35 : 0.95;
       const add = (g, mi) => { for (const gr of g.groups) gr.materialIndex = mi; geos.push(g); return g; };
-      // plinto
-      const groundBelow = yb > 0 && L.tiles[(yb - 1) * W + x0] === T.GROUND;
-      add(roundedBox(wd + 0.04, 0.34, D + 0.3, 0.07, s, { offset: [cx, yb + 0.12, 0] }), 1);
-      add(roundedBox(wd - 0.06, 0.14, D + 0.14, 0.06, s, { offset: [cx, yb + 0.35, 0] }), 1);
-      void groundBelow;
+      // ¿hay algo sólido debajo? si no (columna sobre abismo), el fuste baja hasta el fondo sin plinto
+      let support = false; for (let yy = yb - 1; yy >= 0 && !support; yy--) for (let k = 0; k < wd; k++) { const t = L.tiles[yy * W + x0 + k]; if (t && t !== T.LAVA && t !== T.SPIKES) support = true; }
+      if (support || yb > 0 && L.tiles[(yb - 1) * W + x0] === T.LAVA) {
+        add(roundedBox(wd + 0.04, 0.34, D + 0.3, 0.07, s, { offset: [cx, yb + 0.12, 0] }), 1);
+        add(roundedBox(wd - 0.06, 0.14, D + 0.14, 0.06, s, { offset: [cx, yb + 0.35, 0] }), 1);
+      } else yb = YB - 0.4;
       const top = capital ? yt + 0.2 : yt + 1, bot = yb + 0.4, h = top - bot;
       if (h > 0.05) {
         const sh = roundedBox(wd - 0.24, h, D, Math.min(0.42, (wd - 0.24) / 2 - 0.02), q === 'low' ? 3 : 5, { offset: [cx, bot + h / 2, 0], maxStep: 0.5 });

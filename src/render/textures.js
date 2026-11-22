@@ -34,7 +34,7 @@ const FN = 512; let FIELD = null;
 function field() {
   if (FIELD) return FIELD;
   FIELD = new Float32Array(FN * FN);
-  for (let y = 0; y < FN; y++) for (let x = 0; x < FN; x++) FIELD[y * FN + x] = fbmSlow(x / FN, y / FN, 2, 7, 999);
+  for (let y = 0; y < FN; y++) for (let x = 0; x < FN; x++) FIELD[y * FN + x] = fbmSlow(x / FN, y / FN, 4, 6, 999);
   // normalizar contraste a ~0..1
   let mn = 1, mx = 0; for (const v of FIELD) { if (v < mn) mn = v; if (v > mx) mx = v; }
   for (let i = 0; i < FIELD.length; i++) FIELD[i] = 0.5 + ((FIELD[i] - mn) / (mx - mn) - 0.5) * 1.15;
@@ -43,7 +43,7 @@ function field() {
 /** fbm periódico rápido: u,v en [0,1), freq = celdas base (entero para que sea periódico). */
 export function fbm(u, v, freq, oct = 4, s = 0, fy = freq) {
   const F = FIELD || field();
-  const x = (u * Math.max(1, Math.round(freq * 0.5)) + hash(s, 1, 77)) * FN, y = (v * Math.max(1, Math.round(fy * 0.5)) + hash(s, 2, 77)) * FN;
+  const x = (u * Math.max(1, Math.round(freq * 0.25)) + hash(s, 1, 77)) * FN, y = (v * Math.max(1, Math.round(fy * 0.25)) + hash(s, 2, 77)) * FN;
   const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fyy = y - yi;
   const x0 = xi & (FN - 1), x1 = (xi + 1) & (FN - 1), y0 = (yi & (FN - 1)) * FN, y1 = ((yi + 1) & (FN - 1)) * FN;
   const a = F[y0 + x0], b = F[y0 + x1], c = F[y1 + x0], d = F[y1 + x1];
@@ -285,7 +285,7 @@ export function stoneTex(theme, size) {
       let c = lerp3(c1, c0, n); c = [c[0] * tone, c[1] * tone, c[2] * tone];
       c = lerp3(c, [c[0] * 0.78, c[1] * 0.78, c[2] * 0.78], 1 - bevO);
       let em = 0;
-      if (theme === 'pradera') { const moss = sstep(0.58, 0.7, fbm(u, v, 6, 4, 61) + y * 0.25); c = lerp3(c, [acc[0] * (0.7 + n * 0.5), acc[1] * (0.7 + n * 0.5), acc[2] * 0.7], moss); }
+      if (theme === 'pradera') { const moss = sstep(0.62, 0.72, fbm(u, v, 6, 4, 61) * 0.7 + sstep(0.15, 0.5, y) * 0.45); c = lerp3(c, [acc[0] * (0.7 + n * 0.5), acc[1] * (0.7 + n * 0.5), acc[2] * 0.7], moss); }
       else if (theme === 'cielo') { const line = sstep(0.012, 0.0, Math.abs(inner)) ; c = lerp3(c, acc, line); em = 0; b.metal()[i] = line; }
       else { em = cr * (theme === 'castillo' ? 1 : 0.7); }
       b.setC(i, c);
@@ -308,7 +308,7 @@ export function pillarTex(theme, size) {
       const tone = 0.8 + n * 0.3; c = [c[0] * tone, c[1] * tone, c[2] * tone];
       let h = Math.pow(fl, 0.45) * 0.7 + n * 0.15 + n2 * 0.05, r = 0.78 + n2 * 0.15, e = 0;
       if (theme === 'pradera') {
-        const m = sstep(0.5, 0.66, fbm(u, v, 4, 5, 81) + (1 - fl) * 0.08);
+        const m = sstep(0.55, 0.7, fbm(u, v, 8, 5, 81) * 0.6 + fbmSlow(u, v, 3, 4, 83) * 0.4 + (1 - fl) * 0.06);
         c = lerp3(c, [moss[0] * (0.6 + n2 * 0.6), moss[1] * (0.6 + n2 * 0.6), moss[2] * 0.6], m); h += m * 0.15; r = mix(r, 0.95, m);
       } else if (theme === 'cueva') {
         const band = 0.5 + 0.5 * Math.sin(v * Math.PI * 4 + n * 3); e = (0.3 + 0.7 * fl) * band * 0.6 + sstep(0.7, 0.9, n2) * 0.5;

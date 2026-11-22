@@ -129,8 +129,8 @@ function beetleRes() {
     const shellTex = tex('beetleShell', 256, 128, (g, w, h) => {
       // v: arriba (polo) → borde. Degradado iridiscente + ribete dorado + punteado
       const gr = g.createLinearGradient(0, 0, 0, h);
-      gr.addColorStop(0, '#7af2c8'); gr.addColorStop(0.35, '#22b890'); gr.addColorStop(0.75, '#13708a');
-      gr.addColorStop(0.88, '#1b3f80'); gr.addColorStop(0.9, '#f6cf5a'); gr.addColorStop(0.97, '#c0841c'); gr.addColorStop(1, '#6a3c0c');
+      gr.addColorStop(0, '#4ef0a8'); gr.addColorStop(0.35, '#10a868'); gr.addColorStop(0.75, '#08607a');
+      gr.addColorStop(0.88, '#122c6a'); gr.addColorStop(0.9, '#f6cf5a'); gr.addColorStop(0.97, '#c0841c'); gr.addColorStop(1, '#6a3c0c');
       g.fillStyle = gr; g.fillRect(0, 0, w, h);
       for (let r = 0; r < 9; r++) for (let c = 0; c < 40; c++) {
         const x = (c + (r % 2) * 0.5) * w / 40, y = 8 + r * h * 0.085;
@@ -155,7 +155,7 @@ function beetleRes() {
     const belly = new THREE.SphereGeometry(1, n, 8, 0, TAU, Math.PI / 2, Math.PI / 2); belly.scale(0.35, 0.1, 0.44);
     const rimG = new THREE.TorusGeometry(1, 0.06, 6, n); rimG.rotateX(Math.PI / 2); rimG.scale(0.37, 0.6, 0.47);
     const head = new THREE.SphereGeometry(0.19, 18, 14);
-    const legR = merge([capsuleBetween([0, 0, 0], [0.13, 0.07, 0], 0.036, 3, 6), capsuleBetween([0.13, 0.07, 0], [0.19, -0.27, 0.02], 0.03, 3, 6), new THREE.SphereGeometry(0.042, 8, 6).translate(0.19, -0.27, 0.02)]);
+    const legR = merge([capsuleBetween([0, 0, 0], [0.12, 0.06, 0], 0.042, 3, 6), capsuleBetween([0.12, 0.06, 0], [0.17, -0.19, 0.02], 0.036, 3, 6), new THREE.SphereGeometry(0.048, 8, 6).translate(0.17, -0.19, 0.02)]);
     const legL = legR.clone().scale(-1, 1, 1);
     // invertir caras al espejar
     { const p = legL.attributes.position, nn = legL.attributes.normal; for (let i = 0; i < p.count; i += 3) { for (const a of [p, nn]) { const x = a.getX(i + 1), y = a.getY(i + 1), z = a.getZ(i + 1); a.setXYZ(i + 1, a.getX(i + 2), a.getY(i + 2), a.getZ(i + 2)); a.setXYZ(i + 2, x, y, z); } } }
@@ -171,14 +171,14 @@ function beetleRes() {
     return {
       shell, belly, rimG, head, legR, legL, antennae, mandibles, lid, trail,
       shellMat: mat('beetleShell', {
-        physical: true, map: shellTex, bumpMap: bump, bumpScale: 1.5, metalness: 0.55, roughness: 0.26,
-        clearcoat: 1, clearcoatRoughness: 0.06, iridescence: 1, iridescenceIOR: 1.7, iridescenceThicknessRange: [180, 620],
-        env: 1.1, rim: [0x9ffff0, 0.3, 2.6],
+        physical: true, map: shellTex, bumpMap: bump, bumpScale: 1.5, metalness: 0.3, roughness: 0.3,
+        clearcoat: 1, clearcoatRoughness: 0.06, iridescence: 0.45, iridescenceIOR: 1.5, iridescenceThicknessRange: [300, 600],
+        env: 0.7, rim: [0x9ffff0, 0.18, 2.6],
       }),
       bellyMat: mat('beetleBelly', { color: 0x15203a, roughness: 0.5 }),
       rimMat: mat('beetleRim', { color: 0xe8b23a, metalness: 0.9, roughness: 0.3, env: 1 }),
       headMat: mat('beetleHead', { physical: true, color: 0x1e2550, roughness: 0.3, clearcoat: 0.8, clearcoatRoughness: 0.15, env: 0.6, rim: [0x9fc8ff, 0.4, 2.5] }),
-      legMat: mat('beetleLeg', { color: 0x1a1a38, roughness: 0.4, metalness: 0.2, env: 0.5 }),
+      legMat: mat('beetleLeg', { color: 0x1c2a4a, roughness: 0.4, metalness: 0.2, env: 0.5 }),
       goldMat: mat('beetleGold', { color: 0xffc04a, metalness: 0.8, roughness: 0.3, env: 1, emissive: 0x3a2000 }),
       trailMat: cached('mat:beetleTrail', () => new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false })),
     };
@@ -238,7 +238,7 @@ export function createBeetleModel() {
       // cuerpo: al esconderse, baja al suelo y la cabeza/patas se retraen
       const wake = s.waking || 0;
       const shake = wake > 0 ? Math.sin(t * 70) * 0.03 * (0.3 + wake) : 0;
-      bodyG.position.set(shake, 0.32 - 0.3 * k, 0);
+      bodyG.position.set(shake, 0.24 - 0.22 * k, 0);
       shellG.position.y = 0;
       const ss = 1 + 0.08 * k; shellG.scale.set(ss, ss, ss);
       const headOut = 1 - k + k * wake * 0.75;
@@ -252,7 +252,7 @@ export function createBeetleModel() {
         const p = ph + o;
         l.visible = legOut > 0.03;
         l.scale.setScalar(Math.max(0.001, legOut));
-        l.position.y = 0.3 - 0.28 * k;
+        l.position.y = 0.22 - 0.2 * k;
         const walking = inShell ? 0 : 1;
         l.rotation.y = base + Math.sin(p) * 0.45 * walking + (inShell ? Math.sin(t * 40 + o) * 0.3 * wake : 0);
         l.rotation.z = Math.max(0, Math.cos(p)) * 0.25 * walking * l.userData.sx;
@@ -407,7 +407,7 @@ function plantRes() {
     const jawCol = (front) => (x, y, z, c) => {
       const f = THREE.MathUtils.clamp((z + 0.1) / 0.45, 0, 1), up = THREE.MathUtils.clamp(y / 0.26, 0, 1);
       // carmesí/magenta arriba-atrás → naranja-amarillo en el labio delantero
-      const r = 0.75 + 0.25 * f, gg = 0.06 + 0.5 * f * (1 - up * 0.6), b = 0.28 * (1 - f) + 0.05;
+      const r = 0.62 + 0.36 * f, gg = 0.03 + 0.42 * f * (1 - up * 0.7), b = 0.2 * (1 - f) + 0.04;
       c.setRGB(r, gg * front, b);
     };
     const upper = new THREE.SphereGeometry(1, n, segs(12, 9, 6), 0, TAU, 0, Math.PI / 2); upper.scale(0.29, 0.25, 0.36); upper.translate(0, 0, 0.13);
@@ -433,7 +433,7 @@ function plantRes() {
     petal.moveTo(0, 0); petal.bezierCurveTo(0.12, 0.08, 0.14, 0.3, 0, 0.42); petal.bezierCurveTo(-0.14, 0.3, -0.12, 0.08, 0, 0);
     const pg = new THREE.ShapeGeometry(petal, 8);
     { const p = pg.attributes.position; for (let i = 0; i < p.count; i++) { const y = p.getY(i), x = p.getX(i); p.setZ(i, y * y * 0.6 - x * x * 1.5); } }
-    vcolor(pg, (x, y, z, c) => { const k = y / 0.42; c.setRGB(1, 0.85 - 0.75 * k, 0.15 + 0.35 * k * k); });
+    vcolor(pg, (x, y, z, c) => { const k = y / 0.42; c.setRGB(1 - 0.15 * k, 0.82 - 0.76 * k, 0.08 + 0.1 * k); });
     const petals = [];
     const NP = 9;
     for (let i = 0; i < NP; i++) {
@@ -451,7 +451,7 @@ function plantRes() {
       leafG, stem, upper, lower, discU, discL, teethU, teethL, frill, horns, brow, pod,
       stemMat: mat('plantStem', { map: stemTex, roughness: 0.55, rim: [0xd8ffb0, 0.3, 2.5] }),
       leafMat: mat('plantLeaf', { vertexColors: true, roughness: 0.5, side: THREE.DoubleSide, rim: [0xe0ffb0, 0.25, 2.5] }),
-      jawMat: mat('plantJaw', { physical: true, vertexColors: true, roughness: 0.35, clearcoat: 0.7, clearcoatRoughness: 0.2, sheen: 0.6, sheenColor: new THREE.Color(0xff80a0), rim: [0xffb080, 0.45, 2.5] }),
+      jawMat: mat('plantJaw', { physical: true, vertexColors: true, roughness: 0.35, clearcoat: 0.7, clearcoatRoughness: 0.2, sheen: 0.25, sheenColor: new THREE.Color(0xff8060), rim: [0xffb080, 0.28, 2.5] }),
       mouthMat: mat('plantMouth', { map: mouthTex, emissive: 0xffffff, emissiveMap: mouthTex, emissiveIntensity: 1.6, roughness: 0.6 }),
       toothMat: mat('tooth', { color: 0xfff6e8, roughness: 0.3 }),
       frillMat: mat('plantFrill', { vertexColors: true, roughness: 0.45, side: THREE.DoubleSide, emissive: 0xff5010, emissiveIntensity: 0.18, rim: [0xffd080, 0.3, 2] }),

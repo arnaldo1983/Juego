@@ -24,7 +24,7 @@ function coinRes() {
     g.userData.shared = true;
     return {
       geo: g,
-      mat: mat('gold', { physical: true, color: 0xffc23a, metalness: 1, roughness: 0.2, env: 1.35, emissive: 0xff8a10, emissiveIntensity: 0.16, clearcoat: 0.4, clearcoatRoughness: 0.1, rim: [0xfff0b0, 0.5, 2.5] }),
+      mat: mat('gold', { physical: true, color: 0xffc23a, metalness: 1, roughness: 0.2, env: 1.35, emissive: 0xff8a10, emissiveIntensity: 0.07, clearcoat: 0.4, clearcoatRoughness: 0.1, rim: [0xfff0b0, 0.5, 2.5] }),
     };
   });
 }
@@ -171,7 +171,7 @@ function flowerRes() {
     return {
       outer, mid, inner, core, stem, leaves,
       outerMat: mat('flowerOuter', petalOpts(0.35)), midMat: mat('flowerMid', petalOpts(0.55)), innerMat: mat('flowerInner', petalOpts(0.8)),
-      coreMat: mat('flowerCore', { color: 0xfff4c0, emissive: 0xffd060, emissiveIntensity: 1.4, roughness: 0.3 }),
+      coreMat: mat('flowerCore', { color: 0xfff4c0, emissive: 0xffc040, emissiveIntensity: 0.7, roughness: 0.3 }),
       stemMat: mat('flowerStem', { color: 0x3aa83a, roughness: 0.5, rim: [0xd8ffb0, 0.3, 2.5] }),
       leafMat: mat('fruitLeaf', { color: 0x3ec43a, roughness: 0.45, side: THREE.DoubleSide, rim: [0xe0ffb0, 0.3, 2.5] }),
     };
@@ -217,8 +217,8 @@ function starRes() {
       for (let i = 0; i < p.count; i += 3) {
         const cx = (p.getX(i) + p.getX(i + 1) + p.getX(i + 2)) / 3, cy = (p.getY(i) + p.getY(i + 1) + p.getY(i + 2)) / 3;
         const front = p.getZ(i) > 0 ? 0 : 0.08;
-        col.setHSL(((Math.atan2(cy, cx) / TAU + 1) % 1 + front) % 1, 0.75, 0.72);
-        col.lerp(new THREE.Color(0xfff6c0), 0.35);
+        col.setHSL(((Math.atan2(cy, cx) / TAU + 1) % 1 + front) % 1, 0.85, 0.6);
+        col.lerp(new THREE.Color(0xfff2a0), 0.25);
         for (let k = 0; k < 3; k++) c.set([col.r, col.g, col.b], (i + k) * 3);
       }
       outerG.setAttribute('color', new THREE.BufferAttribute(c, 3)); }
@@ -237,9 +237,9 @@ function starRes() {
     [outerG, innerG].forEach((g) => (g.userData.shared = true));
     return {
       outerG, innerG,
-      outerMat: mat('starOuter', { physical: true, vertexColors: true, flatShading: true, metalness: 0.15, roughness: 0.06, clearcoat: 1, clearcoatRoughness: 0.02, iridescence: 1, iridescenceIOR: 1.8, iridescenceThicknessRange: [250, 900], emissive: 0xffe680, emissiveIntensity: 0.45, transparent: true, opacity: 0.88, env: 1.5 }),
-      innerMat: cached('mat:starInner', () => new THREE.MeshBasicMaterial({ color: new THREE.Color(2.2, 2.0, 1.4), toneMapped: true })),
-      haloMat: cached('mat:starHalo', () => new THREE.SpriteMaterial({ map: haloTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.85, toneMapped: false })),
+      outerMat: mat('starOuter', { physical: true, vertexColors: true, flatShading: true, metalness: 0.15, roughness: 0.06, clearcoat: 1, clearcoatRoughness: 0.02, iridescence: 1, iridescenceIOR: 1.8, iridescenceThicknessRange: [250, 900], emissive: 0xffe680, emissiveIntensity: 0.2, transparent: true, opacity: 0.93, env: 1.2 }),
+      innerMat: cached('mat:starInner', () => new THREE.MeshBasicMaterial({ color: new THREE.Color(1.5, 1.3, 0.8), toneMapped: true })),
+      haloMat: cached('mat:starHalo', () => new THREE.SpriteMaterial({ map: haloTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.6, toneMapped: false })),
     };
   });
 }
@@ -253,7 +253,7 @@ export function createStarModel() {
   const outer = mesh(R.outerG, R.outerMat); outer.renderOrder = 2;
   spin.add(inner, outer);
   const halo = new THREE.Sprite(R.haloMat); halo.scale.setScalar(1.25); halo.position.y = 0.42; halo.renderOrder = 0; root.add(halo);
-  const glow = glowSprite('starGlow', 0xfff0a0, 1.3, 0.6); glow.position.y = 0.42; root.add(glow);
+  const glow = glowSprite('starGlow', 0xffe070, 1.0, 0.35); glow.position.y = 0.42; root.add(glow);
   const sparks = [];
   for (let i = 0; i < (isLow() ? 1 : 3); i++) { const sp = glowSprite('starSpark', 0xffffff, 0.2, 1, sparkleTex()); root.add(sp); sparks.push(sp); }
   const col = new THREE.Color();
@@ -265,10 +265,10 @@ export function createStarModel() {
       spin.rotation.z = Math.sin(t * 2) * 0.12;
       const pulse = 0.5 + 0.5 * Math.sin(t * 6);
       R.outerMat.emissive.copy(col.setHSL((t * 0.35) % 1, 0.9, 0.6));
-      R.outerMat.emissiveIntensity = 0.35 + pulse * 0.3;
+      R.outerMat.emissiveIntensity = 0.12 + pulse * 0.18;
       R.haloMat.rotation = t * 0.8;
       halo.scale.setScalar(1.15 + pulse * 0.15);
-      glow.scale.setScalar(1.2 + pulse * 0.25);
+      glow.scale.setScalar(0.95 + pulse * 0.2);
       sparks.forEach((sp, i) => {
         const a = t * 2.4 + i * TAU / sparks.length;
         sp.position.set(Math.cos(a) * 0.5, 0.42 + Math.sin(a * 1.3) * 0.3, Math.sin(a) * 0.3);
@@ -296,7 +296,7 @@ function cloverRes() {
     vcolor(hg, (x, y, z, c) => {
       const r = Math.hypot(x, y) / 0.32;
       const vein = Math.abs(x) < 0.012 && y > 0.04 && y < 0.2 ? 0.25 : 0;
-      c.setRGB(0.1 + 0.25 * r + vein, 0.5 + 0.4 * r + vein, 0.12 + 0.1 * r + vein * 0.5);
+      c.setRGB(0.04 + 0.14 * r + vein * 0.6, 0.32 + 0.38 * r + vein, 0.05 + 0.04 * r + vein * 0.3);
     });
     const leaves = merge([0, 1, 2, 3].map((i) => hg.clone().rotateZ(Math.PI / 4 + i * Math.PI / 2)), true);
     leaves.translate(0, 0.45, 0);
@@ -305,7 +305,7 @@ function cloverRes() {
     [leaves, stem, gem].forEach((g) => (g.userData.shared = true));
     return {
       leaves, stem, gem,
-      leafMat: mat('cloverLeaf', { physical: true, vertexColors: true, roughness: 0.35, clearcoat: 0.6, clearcoatRoughness: 0.2, sheen: 0.6, sheenColor: new THREE.Color(0xc0ffb0), emissive: 0x20a030, emissiveIntensity: 0.25, rim: [0xe0ffc0, 0.5, 2.4] }),
+      leafMat: mat('cloverLeaf', { physical: true, vertexColors: true, roughness: 0.35, clearcoat: 0.6, clearcoatRoughness: 0.2, sheen: 0.15, sheenColor: new THREE.Color(0xc0ffb0), emissive: 0x20a030, emissiveIntensity: 0.08, rim: [0xe0ffc0, 0.25, 2.6] }),
       stemMat: mat('flowerStem', { color: 0x3aa83a, roughness: 0.5, rim: [0xd8ffb0, 0.3, 2.5] }),
       gemMat: mat('cloverGem', { physical: true, color: 0xffd040, metalness: 0.9, roughness: 0.15, flatShading: true, emissive: 0xffa020, emissiveIntensity: 0.5, env: 1.3 }),
     };
@@ -319,7 +319,7 @@ export function createOneUpModel() {
   const bob = group(); root.add(bob);
   bob.add(mesh(R.leaves, R.leafMat), mesh(R.stem, R.stemMat, false), mesh(R.gem, R.gemMat, false));
   const eyes = [-1, 1].map((sx) => { const e = makeEye(0.04, 'green', 0.85, 1.3, 0.6); e.position.set(sx * 0.1, 0.56, 0.06); bob.add(e); return e; });
-  const glow = glowSprite('cloverGlow', 0x60ff70, 1.1, 0.4); glow.position.y = 0.42; root.add(glow);
+  const glow = glowSprite('cloverGlow', 0x60ff70, 1.0, 0.25); glow.position.y = 0.42; root.add(glow);
   const spark = glowSprite('cloverSpark', 0xfff6c0, 0.3, 1, sparkleTex()); root.add(spark);
   return {
     root,
