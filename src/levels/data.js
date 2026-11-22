@@ -57,11 +57,11 @@ function level1() {
 
   // E) Giro: columnas que salen del abismo.
   b.pit(121, 123);
-  b.pillar(124, 0, 4);
-  b.coins(124, 5, 2);
+  b.pillar(124, 0, 3);
+  b.coins(124, 4, 2);
   b.pit(126, 128);
-  b.pillar(129, 0, 5);
-  b.coins(129, 6, 2);
+  b.pillar(129, 0, 4);
+  b.coins(129, 5, 2);
   b.pit(131, 133);
   b.arc(131, 6, 3, 1);
   b.put(136, 2, 'e').put(138, 2, 'e');
