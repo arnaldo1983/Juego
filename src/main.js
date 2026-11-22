@@ -242,6 +242,7 @@ class Game {
     this.last = now;
     if (params.get('fixed')) dt = 1 / 60;
     this.clock += dt;
+    this.adaptResolution(now);
     this.input.poll();
     if (this.input.pressed('pause') && (this.state === 'playing' || this.state === 'paused')) this.togglePause();
     if (this.stopT > 0) { this.stopT -= dt; this.render(dt, 0); return; }
@@ -262,6 +263,24 @@ class Game {
       case 'goal': simDt = dt; this.updateGoal(dt); break;
     }
     this.render(dt, simDt);
+  }
+
+  // Resolución dinámica: baja/sube el pixelRatio para mantener ~55+ fps en móvil.
+  adaptResolution(now) {
+    if (params.get('fixed') || params.get('q')) return;
+    const a = this.perf ??= { t0: now, n: 0, scale: 1, maxPR: this.pixelRatio };
+    a.n++;
+    if (now - a.t0 < 2000) return;
+    const fps = a.n * 1000 / (now - a.t0); a.t0 = now; a.n = 0;
+    if (document.hidden || this.state === 'title' && this.clock < 3) return;
+    let s = a.scale;
+    if (fps < 48) s = Math.max(0.55, s - 0.15); else if (fps > 58 && s < 1) s = Math.min(1, s + 0.05);
+    if (s !== a.scale) {
+      a.scale = s;
+      this.pixelRatio = Math.max(0.75, a.maxPR * s);
+      this.renderer.setPixelRatio(this.pixelRatio);
+      this.resize();
+    }
   }
 
   titleUpdate(dt) {
