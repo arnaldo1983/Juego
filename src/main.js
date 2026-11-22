@@ -91,7 +91,8 @@ class Game {
     const sx = cp ? cp.x : this.level.start.x, sy = cp ? cp.y : this.level.start.y;
     if (cp) this.checkpoints.forEach((c) => { if (c.x <= cp.x + 0.1) c.activeFlag = true; });
     this.pending = this.pending.filter((s) => !(cp && s.x < cp.x - 8));
-    this.player = new Player(this, +(params.get('x') || sx), sy);
+    const px = +(params.get('x') || sx);
+    this.player = new Player(this, px, params.get('x') ? Math.max(0, this.level.groundBelow(px, this.level.h - 4)) : sy);
     if (params.get('power')) this.player.setPower(+params.get('power'), false);
     this.goalSeq = null;
     this.timeLeft = this.level.time;
