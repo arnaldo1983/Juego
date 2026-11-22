@@ -36,7 +36,7 @@ export function buildCueva(ctx) {
   const { w, gy, q } = ctx;
   const g = geos(), m = mats(), r = rng(777 + w), group = new THREE.Group();
   const span = (z) => (22 - z) * 0.78 + 6;
-  const dens = q === 'low' ? 0.45 : q === 'medium' ? 0.7 : 1;
+  const dens = q === 'low' ? 0.3 : q === 'medium' ? 0.55 : 1;
   const CRY = [0x2ee6ff, 0xff4fd8, 0x9b6bff, 0x4fffc1];
 
   // --- Suelo rocoso

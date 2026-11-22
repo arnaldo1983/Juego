@@ -51,7 +51,7 @@ export function buildCastillo(ctx) {
   const { w, gy, q } = ctx;
   const g = geos(), m = mats(), r = rng(666 + w), group = new THREE.Group();
   const span = (z) => (22 - z) * 0.78 + 6;
-  const dens = q === 'low' ? 0.45 : q === 'medium' ? 0.7 : 1;
+  const dens = q === 'low' ? 0.3 : q === 'medium' ? 0.55 : 1;
 
   // --- Río de lava serpenteante y suelo de basalto con grietas encendidas
   const riverZ = (x) => -15 + 3.5 * Math.sin(x * 0.045) + 1.5 * Math.sin(x * 0.13 + 1);

@@ -98,9 +98,9 @@ function level1() {
 function level2() {
   const b = new Builder(200, 15);
   b.ground(0, 199);
-  b.ceiling(0, 183, 2);
+  b.ceiling(0, 183, 3);
   // estalactitas que cuelgan del techo (decoran y limitan saltos altos)
-  for (const [x, w, d] of [[14, 3, 1], [27, 2, 2], [58, 3, 1], [92, 2, 1], [147, 3, 1], [176, 2, 1]]) b.rect(x, 13 - d, w, d, '#');
+  for (const [x, w, d] of [[14, 3, 1], [27, 2, 2], [58, 3, 1], [92, 2, 1], [147, 3, 1], [176, 2, 1]]) b.rect(x, 12 - d, w, d, '#');
 
   // A) Enseñar las plataformas de un sentido.
   b.put(3, 2, '@');
@@ -133,7 +133,7 @@ function level2() {
   b.put(80, 5, 'V');
   b.island(84, 95, 8);
   b.coins(86, 9, 6);
-  b.put(90, 12, '1');                        // secreto: 1UP incrustado en el techo, sobre la repisa
+  b.put(90, 11, '1');                        // secreto: 1UP incrustado en el techo, sobre la repisa
   b.put(93, 8, 'e');
 
   // Punto de control.

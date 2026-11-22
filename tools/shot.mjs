@@ -9,6 +9,7 @@ const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=sw
 const ctxOpts = opt.mobile ? { ...devices['iPhone 13 landscape'] } : { viewport: { width: +(opt.w || 1280), height: +(opt.h || 720) }, deviceScaleFactor: 1 };
 const ctx = await browser.newContext(ctxOpts);
 const page = await ctx.newPage();
+page.setDefaultTimeout(240000);
 const errors = [];
 page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') errors.push(`[${m.type()}] ${m.text()}`); });
 page.on('pageerror', (e) => errors.push('[pageerror] ' + e.message));
@@ -22,7 +23,7 @@ if (opt.keys) for (const seg of String(opt.keys).split(',')) {
 }
 if (opt.eval) console.log('eval:', await page.evaluate(String(opt.eval)));
 if (opt.after) await page.waitForTimeout(+opt.after);
-await page.screenshot({ path: out });
+await page.screenshot({ path: out, timeout: 240000 });
 const fps = await page.evaluate(() => new Promise((r) => { let n = 0; const t0 = performance.now(); const f = () => { n++; if (performance.now() - t0 < 1000) requestAnimationFrame(f); else r(n); }; requestAnimationFrame(f); }));
 console.log('fps(swiftshader):', fps);
 if (errors.length) console.log('ERRORES:\n' + errors.slice(0, 20).join('\n')); else console.log('sin errores');

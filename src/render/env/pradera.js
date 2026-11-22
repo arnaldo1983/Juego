@@ -19,17 +19,17 @@ function geos() {
   const pine = merge([pTrunk, ...cones]);
   // Mata: racimo de esferas
   const b = (r, x, y, z, s) => xf(paint(jitter(new THREE.IcosahedronGeometry(r, 1), 0.06, 2, s), 0x3f8a2e, { top: 0x86c94c, y0: -0.2, y1: 0.7, shadeBottom: 0.4 }), { x, y, z, sy: 0.85 });
-  const bush = merge([b(0.6, 0, 0.35, 0, 1), b(0.45, 0.55, 0.25, 0.1, 2), b(0.42, -0.5, 0.22, 0.05, 3)]);
+  const bush = merge([b(0.62, 0, 0.35, 0, 1), b(0.48, 0.55, 0.25, 0.1, 2)]);
   // Flor: tallo + cabeza (cabeza tintable por instancia)
-  const stem = merge([paint(new THREE.CylinderGeometry(0.025, 0.03, 0.55, 4).translate(0, 0.27, 0), 0x3d8a2a),
-    paint(new THREE.SphereGeometry(0.09, 5, 3).scale(1.6, 0.35, 0.8).translate(0.1, 0.18, 0), 0x4c9e32)]);
+  const stem = merge([paint(new THREE.CylinderGeometry(0.025, 0.03, 0.55, 3, 1, true).translate(0, 0.27, 0), 0x3d8a2a),
+    paint(new THREE.OctahedronGeometry(0.09, 0).scale(1.6, 0.35, 0.8).translate(0.1, 0.18, 0), 0x4c9e32)]);
   const petals = [];
-  for (let i = 0; i < 5; i++) { const a = (i / 5) * Math.PI * 2; petals.push(paint(new THREE.SphereGeometry(0.08, 5, 3).scale(1, 1, 0.45).translate(Math.cos(a) * 0.085, 0.56 + Math.sin(a) * 0.085, 0), 0xffffff)); }
-  const head = merge([...petals, paint(new THREE.SphereGeometry(0.05, 6, 4).translate(0, 0.56, 0.025), 0xffd23a)]);
+  for (let i = 0; i < 5; i++) { const a = (i / 5) * Math.PI * 2; petals.push(paint(new THREE.OctahedronGeometry(0.08, 0).scale(1, 1, 0.45).translate(Math.cos(a) * 0.085, 0.56 + Math.sin(a) * 0.085, 0), 0xffffff)); }
+  const head = merge([...petals, paint(new THREE.OctahedronGeometry(0.055, 0).translate(0, 0.56, 0.03), 0xffd23a)]);
   // Mechón de hierba
   const blades = [];
-  for (let i = 0; i < 6; i++) {
-    const a = (i / 6) * Math.PI * 2 + 0.3, h = 0.35 + (i % 3) * 0.12;
+  for (let i = 0; i < 5; i++) {
+    const a = (i / 5) * Math.PI * 2 + 0.3, h = 0.35 + (i % 3) * 0.12;
     const g = new THREE.ConeGeometry(0.035, h, 3).translate(0, h / 2, 0);
     xf(g, { x: Math.cos(a) * 0.08, z: Math.sin(a) * 0.08, rz: Math.cos(a) * 0.35, rx: Math.sin(a) * 0.35 });
     blades.push(paint(g, 0x3c7f26, { top: 0xa6dc63, y0: 0, y1: 0.45 }));
@@ -79,7 +79,7 @@ export function buildPradera(ctx) {
   const { w, gy, q } = ctx;
   const g = geos(), m = mats(), r = rng(1234 + w), group = new THREE.Group();
   const span = (z) => (22 - z) * 0.78 + 6;
-  const dens = q === 'low' ? 0.45 : q === 'medium' ? 0.7 : 1;
+  const dens = q === 'low' ? 0.3 : q === 'medium' ? 0.55 : 1;
 
   // --- Terreno cercano + colinas (una sola malla)
   const hNear = (x, z) => {

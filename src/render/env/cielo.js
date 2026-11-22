@@ -47,7 +47,7 @@ export function buildCielo(ctx) {
   const { w, gy, q } = ctx;
   const g = geos(), m = mats(), r = rng(4242 + w), group = new THREE.Group();
   const span = (z) => (22 - z) * 0.78 + 6;
-  const dens = q === 'low' ? 0.45 : q === 'medium' ? 0.7 : 1;
+  const dens = q === 'low' ? 0.3 : q === 'medium' ? 0.55 : 1;
 
   // --- Mar de nubes: plano base + bultos esponjosos
   const seaY = -7.5;

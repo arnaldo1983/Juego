@@ -407,7 +407,7 @@ function plantRes() {
     const jawCol = (front) => (x, y, z, c) => {
       const f = THREE.MathUtils.clamp((z + 0.1) / 0.45, 0, 1), up = THREE.MathUtils.clamp(y / 0.26, 0, 1);
       // carmesí/magenta arriba-atrás → naranja-amarillo en el labio delantero
-      const r = 0.62 + 0.36 * f, gg = 0.03 + 0.42 * f * (1 - up * 0.7), b = 0.2 * (1 - f) + 0.04;
+      const r = 0.45 + 0.5 * f, gg = 0.015 + 0.36 * f * (1 - up * 0.75), b = 0.16 * (1 - f) + 0.03;
       c.setRGB(r, gg * front, b);
     };
     const upper = new THREE.SphereGeometry(1, n, segs(12, 9, 6), 0, TAU, 0, Math.PI / 2); upper.scale(0.29, 0.25, 0.36); upper.translate(0, 0, 0.13);
@@ -433,7 +433,7 @@ function plantRes() {
     petal.moveTo(0, 0); petal.bezierCurveTo(0.12, 0.08, 0.14, 0.3, 0, 0.42); petal.bezierCurveTo(-0.14, 0.3, -0.12, 0.08, 0, 0);
     const pg = new THREE.ShapeGeometry(petal, 8);
     { const p = pg.attributes.position; for (let i = 0; i < p.count; i++) { const y = p.getY(i), x = p.getX(i); p.setZ(i, y * y * 0.6 - x * x * 1.5); } }
-    vcolor(pg, (x, y, z, c) => { const k = y / 0.42; c.setRGB(1 - 0.15 * k, 0.82 - 0.76 * k, 0.08 + 0.1 * k); });
+    vcolor(pg, (x, y, z, c) => { const k = y / 0.42; c.setRGB(1 - 0.3 * k, 0.75 - 0.72 * k, 0.04 + 0.06 * k); });
     const petals = [];
     const NP = 9;
     for (let i = 0; i < NP; i++) {
@@ -451,10 +451,10 @@ function plantRes() {
       leafG, stem, upper, lower, discU, discL, teethU, teethL, frill, horns, brow, pod,
       stemMat: mat('plantStem', { map: stemTex, roughness: 0.55, rim: [0xd8ffb0, 0.3, 2.5] }),
       leafMat: mat('plantLeaf', { vertexColors: true, roughness: 0.5, side: THREE.DoubleSide, rim: [0xe0ffb0, 0.25, 2.5] }),
-      jawMat: mat('plantJaw', { physical: true, vertexColors: true, roughness: 0.35, clearcoat: 0.7, clearcoatRoughness: 0.2, sheen: 0.25, sheenColor: new THREE.Color(0xff8060), rim: [0xffb080, 0.28, 2.5] }),
+      jawMat: mat('plantJaw', { physical: true, vertexColors: true, roughness: 0.35, clearcoat: 0.7, clearcoatRoughness: 0.2, rim: [0xff9060, 0.15, 2.5] }),
       mouthMat: mat('plantMouth', { map: mouthTex, emissive: 0xffffff, emissiveMap: mouthTex, emissiveIntensity: 1.6, roughness: 0.6 }),
       toothMat: mat('tooth', { color: 0xfff6e8, roughness: 0.3 }),
-      frillMat: mat('plantFrill', { vertexColors: true, roughness: 0.45, side: THREE.DoubleSide, emissive: 0xff5010, emissiveIntensity: 0.18, rim: [0xffd080, 0.3, 2] }),
+      frillMat: mat('plantFrill', { vertexColors: true, roughness: 0.6, side: THREE.DoubleSide, emissive: 0xff4010, emissiveIntensity: 0.08, rim: [0xffd080, 0.12, 2] }),
       hornMat: mat('plantHorn', { color: 0xffb02a, roughness: 0.35, metalness: 0.2, emissive: 0x401000 }),
       browMat: mat('plantBrow', { color: 0x5a0a1a, roughness: 0.5 }),
     };

@@ -75,7 +75,7 @@ class Game {
     this.post.setSize(innerWidth, innerHeight, this.pixelRatio);
     this.blocks = new BlockRenderer({ scene: this.scene, level: this.level, theme: this.level.theme, renderer: this.renderer, quality: this.quality });
     this.level.onChange = (x, y, o, n) => this.blocks.onTileChange(x, y, o, n);
-    this.particles = new Particles(this.scene, this.camera);
+    this.particles = new Particles(this.scene, this.camera, { quality: this.quality, level: this.level });
     this.enemies = []; this.items = []; this.platforms = [];
     this.pending = this.level.spawns.slice().sort((a, b) => a.x - b.x);
     // Monedas, plataformas y meta se crean al inicio
@@ -148,6 +148,7 @@ class Game {
   onPlayerDeath() {
     this.state = 'dying'; this.dyingT = 0;
     audio.stopMusic(); audio.sfx('die');
+    this.particles.emit('death', this.player.x, this.player.y + this.player.h / 2);
     this.shake(0.3); this.hitStop(0.35);
   }
   afterDeath() {
@@ -288,6 +289,7 @@ class Game {
     }
     for (const pl of this.platforms) pl.update(dt);
     p.update(dt, this.input);
+    if (p.star > 0 && (this.starFx = (this.starFx || 0) + 1) % 2 === 0) this.particles.emit('star', p.x, p.y + p.h / 2);
     if (this.state !== 'playing') { this.syncAll(dt); return; }
     for (const e of this.enemies) if (e.alive) {
       if (Math.abs(e.x - this.cam.x) < this.cam.halfW + 8 || e.dead) e.update(dt);

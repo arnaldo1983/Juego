@@ -217,8 +217,8 @@ function starRes() {
       for (let i = 0; i < p.count; i += 3) {
         const cx = (p.getX(i) + p.getX(i + 1) + p.getX(i + 2)) / 3, cy = (p.getY(i) + p.getY(i + 1) + p.getY(i + 2)) / 3;
         const front = p.getZ(i) > 0 ? 0 : 0.08;
-        col.setHSL(((Math.atan2(cy, cx) / TAU + 1) % 1 + front) % 1, 0.85, 0.6);
-        col.lerp(new THREE.Color(0xfff2a0), 0.25);
+        col.setHSL(((Math.atan2(cy, cx) / TAU + 1) % 1 + front) % 1, 0.9, 0.55);
+        col.lerp(new THREE.Color(0xffe060), 0.2);
         for (let k = 0; k < 3; k++) c.set([col.r, col.g, col.b], (i + k) * 3);
       }
       outerG.setAttribute('color', new THREE.BufferAttribute(c, 3)); }
@@ -237,7 +237,7 @@ function starRes() {
     [outerG, innerG].forEach((g) => (g.userData.shared = true));
     return {
       outerG, innerG,
-      outerMat: mat('starOuter', { physical: true, vertexColors: true, flatShading: true, metalness: 0.15, roughness: 0.06, clearcoat: 1, clearcoatRoughness: 0.02, iridescence: 1, iridescenceIOR: 1.8, iridescenceThicknessRange: [250, 900], emissive: 0xffe680, emissiveIntensity: 0.2, transparent: true, opacity: 0.93, env: 1.2 }),
+      outerMat: mat('starOuter', { physical: true, vertexColors: true, flatShading: true, metalness: 0.05, roughness: 0.18, clearcoat: 0.6, clearcoatRoughness: 0.05, iridescence: 0.35, iridescenceIOR: 1.4, emissive: 0xffe680, emissiveIntensity: 0.15, env: 0.45 }),
       innerMat: cached('mat:starInner', () => new THREE.MeshBasicMaterial({ color: new THREE.Color(1.5, 1.3, 0.8), toneMapped: true })),
       haloMat: cached('mat:starHalo', () => new THREE.SpriteMaterial({ map: haloTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.6, toneMapped: false })),
     };
@@ -249,9 +249,8 @@ export function createStarModel() {
   const R = starRes();
   const root = new THREE.Group();
   const spin = group(); spin.position.y = 0.42; root.add(spin);
-  const inner = mesh(R.innerG, R.innerMat, false); inner.renderOrder = 1;
   const outer = mesh(R.outerG, R.outerMat); outer.renderOrder = 2;
-  spin.add(inner, outer);
+  spin.add(outer);
   const halo = new THREE.Sprite(R.haloMat); halo.scale.setScalar(1.25); halo.position.y = 0.42; halo.renderOrder = 0; root.add(halo);
   const glow = glowSprite('starGlow', 0xffe070, 1.0, 0.35); glow.position.y = 0.42; root.add(glow);
   const sparks = [];
@@ -265,7 +264,7 @@ export function createStarModel() {
       spin.rotation.z = Math.sin(t * 2) * 0.12;
       const pulse = 0.5 + 0.5 * Math.sin(t * 6);
       R.outerMat.emissive.copy(col.setHSL((t * 0.35) % 1, 0.9, 0.6));
-      R.outerMat.emissiveIntensity = 0.12 + pulse * 0.18;
+      R.outerMat.emissiveIntensity = 0.08 + pulse * 0.12;
       R.haloMat.rotation = t * 0.8;
       halo.scale.setScalar(1.15 + pulse * 0.15);
       glow.scale.setScalar(0.95 + pulse * 0.2);
