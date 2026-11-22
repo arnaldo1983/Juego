@@ -66,7 +66,7 @@ ${tip ? 'varying float vTip;' : ''}`)
 function eyeTexture() {
   const W = 512, H = 256;
   const c = document.createElement('canvas'); c.width = W; c.height = H;
-  const g = c.getContext('2d');
+  const g = c.getContext('2d', { willReadFrequently: true });
   // esclerótica con leve sombreado
   const sg = g.createRadialGradient(W / 2, H / 2, 10, W / 2, H / 2, H * 0.7);
   sg.addColorStop(0, '#ffffff'); sg.addColorStop(0.7, '#f4f1ee'); sg.addColorStop(1, '#d9d2cc');

@@ -158,7 +158,7 @@ const texCache = new Map();
 export function canvasTex(key, w, h, draw, { repeat = false, srgb = true, mip = true } = {}) {
   if (texCache.has(key)) return texCache.get(key);
   const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
-  const g = cv.getContext('2d'); draw(g, w, h);
+  const g = cv.getContext('2d', { willReadFrequently: true }); draw(g, w, h);
   const t = new THREE.CanvasTexture(cv);
   if (srgb) t.colorSpace = THREE.SRGBColorSpace;
   if (repeat) t.wrapS = t.wrapT = THREE.RepeatWrapping;

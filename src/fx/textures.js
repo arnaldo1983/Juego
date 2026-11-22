@@ -11,9 +11,9 @@ function rng(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 10139
 // Dibuja en una celda con dos pasadas: forma (alpha) y núcleo (rojo) combinadas por píxel.
 function cell(ctx, col, row, shapeFn, coreFn) {
   const a = document.createElement('canvas'); a.width = a.height = CELL;
-  const ca = a.getContext('2d'); shapeFn(ca);
+  const ca = a.getContext('2d', { willReadFrequently: true }); shapeFn(ca);
   const b = document.createElement('canvas'); b.width = b.height = CELL;
-  const cb = b.getContext('2d'); (coreFn || shapeFn)(cb);
+  const cb = b.getContext('2d', { willReadFrequently: true }); (coreFn || shapeFn)(cb);
   const da = ca.getImageData(0, 0, CELL, CELL).data, db = cb.getImageData(0, 0, CELL, CELL).data;
   const out = ctx.createImageData(CELL, CELL), o = out.data;
   for (let i = 0; i < o.length; i += 4) {
@@ -62,7 +62,7 @@ function smokeShade(c, seed) {
 export function getAtlas() {
   if (atlas) return atlas;
   const cv = document.createElement('canvas'); cv.width = CELL * 4; cv.height = CELL * 2;
-  const ctx = cv.getContext('2d');
+  const ctx = cv.getContext('2d', { willReadFrequently: true });
   // 0 GLOW: halo suave
   cell(ctx, 0, 0, (c) => radial(c, 62, [[0, 1], [0.18, 0.75], [0.45, 0.25], [1, 0]]), (c) => radial(c, 30, [[0, 1], [1, 0]]));
   // 1 SPARK: punto caliente (se estira según velocidad)
@@ -109,11 +109,11 @@ export function getPopupTexture(text) {
   const oneUp = /UP$/i.test(text);
   const fs = 84, pad = 22;
   const font = `900 ${fs}px "Arial Black", "Arial Rounded MT Bold", "Segoe UI", system-ui, sans-serif`;
-  const m = document.createElement('canvas').getContext('2d'); m.font = font;
+  const m = document.createElement('canvas').getContext('2d', { willReadFrequently: true }); m.font = font;
   const tw = Math.ceil(m.measureText(text).width);
   const cv = document.createElement('canvas');
   cv.width = THREE.MathUtils.ceilPowerOfTwo(tw + pad * 2); cv.height = 128;
-  const c = cv.getContext('2d');
+  const c = cv.getContext('2d', { willReadFrequently: true });
   c.font = font; c.textAlign = 'center'; c.textBaseline = 'middle'; c.lineJoin = 'round';
   const cx = cv.width / 2, cy = 66;
   // sombra

@@ -82,7 +82,7 @@ export function mat(key, opts = {}) {
 // ------------------------------------------------------------------ texturas de canvas
 export function canvas(w, h) {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
-  return [c, c.getContext('2d')];
+  return [c, c.getContext('2d', { willReadFrequently: true })];
 }
 export function tex(key, w, h, draw, { srgb = true, repeat = true, aniso = 4 } = {}) {
   return cached('tex:' + key, () => {

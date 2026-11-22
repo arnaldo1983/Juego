@@ -120,7 +120,11 @@ class Game {
       this.input.onAnyKey((c) => { if (this.state === 'title' && (c === 'Enter' || c === 'Space')) this.onTitleStart(); });
     }
     this.last = performance.now();
-    const loop = (t) => { requestAnimationFrame(loop); this.frame(t); };
+    let first = true;
+    const loop = (t) => {
+      requestAnimationFrame(loop); this.frame(t);
+      if (first) { first = false; const ld = document.getElementById('loader'); if (ld) { ld.classList.add('hide'); setTimeout(() => ld.remove(), 700); } }
+    };
     requestAnimationFrame(loop);
   }
   onTitleStart() {
@@ -473,5 +477,4 @@ class Game {
   }
 }
 
-const game = new Game();
-game.start();
+requestAnimationFrame(() => setTimeout(() => { const game = new Game(); game.start(); }, 30));
