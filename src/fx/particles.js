@@ -88,7 +88,8 @@ function materials() {
 
 const BRICK_COLORS = { pradera: 0xc8643a, cueva: 0x6670c8, cielo: 0xe0956a, castillo: 0x86707a };
 const DUST_TINT = 1.25;
-const DUST_COLORS = { pradera: 0xf3e2c4, cueva: 0xb9b6d8, cielo: 0xfff0f0, castillo: 0x9a8a88 };
+const DUST_COLORS = { pradera: 0xf3e2c4, cueva: 0x75729e, cielo: 0xfff0f0, castillo: 0x7a6a66 };
+let dustHex = DUST_COLORS.pradera; // polvo del tema actual
 const FW_PALETTE = [0xff2a5a, 0xffc21a, 0x2a9dff, 0x6aff2a, 0xb24aff, 0xff6a10, 0xff4ad0, 0x1affc0];
 
 function qualityScale(q) { return q === 'low' ? 0.45 : q === 'medium' ? 0.75 : 1; }
@@ -304,6 +305,8 @@ export class Particles {
 
   emit(type, x, y, opts = {}) {
     const fn = EMIT[type];
+    const lv = this.level || (typeof window !== 'undefined' && window.game && window.game.level);
+    dustHex = DUST_COLORS[(lv && lv.theme) || opts.theme] ?? DUST_COLORS.pradera;
     if (fn) fn(this, x, y, opts);
   }
 
@@ -442,14 +445,14 @@ const EMIT = {
     stars(ps, x, y + 0.1, ps.n(5), 0xffe14a, { dir: Math.PI / 2, spread: 1.15, min: 4, max: 6, size: 0.42, grav: 14, lmin: 0.5, lmax: 0.65, hex2: 0xffa020 });
     for (let i = 0; i < ps.n(6); i++) {
       const s = i % 2 ? 1 : -1;
-      puff(ps, x + s * 0.25, y - 0.2, 0xf6efe4, { vx: s * rand(2, 4.5), vy: rand(0.3, 1.2), s0: 0.28, s1: 0.75, life: rand(0.35, 0.55), a: 0.8, drag: 6 });
+      puff(ps, x + s * 0.25, y - 0.2, dustHex, { vx: s * rand(2, 4.5), vy: rand(0.3, 1.2), s0: 0.28, s1: 0.75, life: rand(0.35, 0.55), a: 0.8, drag: 6 });
     }
   },
 
   dust(ps, x, y, o) {
     const n = ps.n(o.count || 4);
     for (let i = 0; i < n; i++) {
-      puff(ps, x + rand(-0.25, 0.25), y + rand(0, 0.15), 0xf1e6d4, { vx: rand(-1.6, 1.6), vy: rand(0.4, 1.6), s0: rand(0.18, 0.3), s1: rand(0.5, 0.8), life: rand(0.4, 0.65), a: 0.7, drag: 5 });
+      puff(ps, x + rand(-0.25, 0.25), y + rand(0, 0.15), dustHex, { vx: rand(-1.6, 1.6), vy: rand(0.4, 1.6), s0: rand(0.18, 0.3), s1: rand(0.5, 0.8), life: rand(0.4, 0.65), a: 0.7, drag: 5 });
     }
   },
 
@@ -458,13 +461,13 @@ const EMIT = {
     const n = ps.n(4 + Math.round(10 * s));
     for (let i = 0; i < n; i++) {
       const side = i % 2 ? 1 : -1;
-      puff(ps, x + side * rand(0.1, 0.4), y + rand(0, 0.12), 0xf1e6d4, { vx: side * rand(2, 6) * (0.5 + s), vy: rand(0.2, 1.4), s0: 0.22, s1: 0.6 + 0.4 * s, life: rand(0.4, 0.7), a: 0.75, drag: 5.5, grav: -0.4 });
+      puff(ps, x + side * rand(0.1, 0.4), y + rand(0, 0.12), dustHex, { vx: side * rand(2, 6) * (0.5 + s), vy: rand(0.2, 1.4), s0: 0.22, s1: 0.6 + 0.4 * s, life: rand(0.4, 0.7), a: 0.75, drag: 5.5, grav: -0.4 });
     }
     if (s > 0.45) ring(ps.alpha, x, y + 0.04, 0xffffff, 1.8 * s + 0.6, 0.3, 1.05, 3.2, 0.55);
   },
 
   skid(ps, x, y) {
-    puff(ps, x, y + 0.12, 0xe9e3dc, { vx: rand(-0.6, 0.6), vy: rand(0.6, 1.4), s0: 0.18, s1: rand(0.45, 0.7), life: rand(0.35, 0.55), a: 0.6, drag: 3 });
+    puff(ps, x, y + 0.12, dustHex, { vx: rand(-0.6, 0.6), vy: rand(0.6, 1.4), s0: 0.18, s1: rand(0.45, 0.7), life: rand(0.35, 0.55), a: 0.6, drag: 3 });
   },
 
   fire(ps, x, y) {
@@ -548,7 +551,7 @@ const EMIT = {
     stars(ps, x, y, ps.n(8), 0xffe060, { min: 3.5, max: 5.5, size: 0.45, grav: 4, lmin: 0.7, lmax: 0.9, hex2: 0xff6aa0, twinkle: true });
     for (let i = 0; i < ps.n(6); i++) {
       const a = Math.random() * 6.283;
-      puff(ps, x, y, 0xf4f0ff, { vx: Math.cos(a) * 3, vy: Math.sin(a) * 3, s0: 0.3, s1: 0.9, life: rand(0.5, 0.8), a: 0.75, drag: 5 });
+      puff(ps, x, y, dustHex, { vx: Math.cos(a) * 3, vy: Math.sin(a) * 3, s0: 0.3, s1: 0.9, life: rand(0.5, 0.8), a: 0.75, drag: 5 });
     }
   },
 
